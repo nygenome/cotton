@@ -12,7 +12,7 @@ def update(upgrade_requirements=False):
     # TODO: only stop servers when changing the symlink
     checkout_source()
     install_requirements(upgrade_requirements)
-    make_symlink()
+    make_symlinks()
     server.start()
     
 
@@ -26,7 +26,7 @@ def cold():
     make_directories()
     checkout_source()
     install_requirements()
-    make_symlink()
+    make_symlinks()
     server.start()
 
 
@@ -56,10 +56,9 @@ def checkout_source():
     # TODO: move this to config/git.py
     # TODO: cached copy strategy
     # TODO: submodules
-    destination = os.path.join(env.releases_path, env.release_name)
     with prefix("umask 0002"):
-        run("git clone %s %s" % (env.scm_repository, destination))
-        run("rm -rf %s" % os.path.join(destination, ".git"))
+        run("git clone %(scm_repository)s %(release_path)s" % env)
+        run("rm -rf %s" % os.path.join(env.release_path, ".git"))
 
 
 def install_requirements(upgrade=False):
@@ -77,11 +76,18 @@ def install_requirements(upgrade=False):
                 sudo(" ".join(command), user=env.app_runner)
 
 
-def make_symlink():
-    '''Create a 'current' symlink pointing to a release we just checked out'''
-    with cd(env.deploy_to):
-        with settings(hide('warnings'), warn_only=True):
-            sudo("test -L %(current_dir)s && rm %(current_dir)s" % env, user=env.app_runner)
+def make_symlinks():
+    '''Create a 'current' symlink pointing to a release we just checked 
+    out, and symlinks within pointing to the shared children'''
+    with settings(hide('warnings'), warn_only=True):
+        sudo("test -L %(current_path)s && rm %(current_path)s" % env, user=env.app_runner)
 
-        sudo("ln -s %s %s" % (os.path.join(env.releases_dir, env.release_name),
-                              env.current_dir), user=env.app_runner)
+    sudo("ln -s %(release_path)s %(current_path)s" % env, user=env.app_runner)
+    for child in env.shared_children:
+        sudo("ln -s %s %s" % (
+            os.path.join(env.shared_path, child),
+            os.path.join(env.release_path, child)
+        ), user=env.app_runner)
+
+
+
