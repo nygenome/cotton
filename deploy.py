@@ -10,7 +10,6 @@ def update(upgrade_requirements=False):
     checkout_source()
     install_requirements(upgrade_requirements)
     # TODO: nginx.maintenance()
-    # TODO: warn only, if test pidfile, stop
     uwsgi.stop()
     make_symlinks()
     uwsgi.start()

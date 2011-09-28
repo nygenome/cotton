@@ -22,6 +22,11 @@ def start():
 
 @task
 def stop():
+    with settings(hide('warnings'), warn_only=True):
+        if sudo("test -e %(uwsgi_pidfile)s" % env, user=env.app_runner).failed:
+            print "PID file not found: %(uwsgi_pidfile)s" % env
+            return
+
     signal("INT")
 
 
@@ -37,6 +42,6 @@ def statistics():
 def signal(signal):
     sudo("kill -%s `cat %s`" % (
         signal,
-        os.path.join(env.shared_path, 'pids', 'uwsgi.pid')
+        env.uwsgi_pidfile
     ), user=env.app_runner)
 
