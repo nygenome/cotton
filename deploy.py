@@ -3,11 +3,17 @@ import os
 from fabric.api import *
 
 @task(default=True)
-def test():
-    print type(env)
-    print dir(env)
-    print env.keys()
-    print "%(releases_dir)s" % env
+def update(upgrade_requirements=False):
+    from config.fabric import server
+
+    server.stop()
+    # wsgi.stop()
+    # nginx.maintenance()
+    # TODO: only stop servers when changing the symlink
+    checkout_source()
+    install_requirements(upgrade_requirements)
+    make_symlink()
+    server.start()
     
 
 @task
@@ -38,6 +44,7 @@ def setup_virtualenv():
 
 def make_directories():
     with prefix("umask 0002"):
+        sudo("mkdir %(deploy_to)s" % env, user=env.app_runner)
         with cd(env.deploy_to):
             sudo("mkdir %(releases_dir)s" % env, user=env.app_runner)
             sudo("mkdir %(shared_dir)s" % env, user=env.app_runner)
@@ -55,11 +62,19 @@ def checkout_source():
         run("rm -rf %s" % os.path.join(destination, ".git"))
 
 
-def install_requirements():
+def install_requirements(upgrade=False):
     '''Install requirements into pip from config/requirements.pip'''
-    with prefix(env.activate_virtualenv):
-        with cd(env.release_path):
-            run("pip install -r config/requirements.pip")#, user=env.app_runner)
+    command = []
+    command.append("pip")
+    command.append("install")
+    if upgrade:
+        command.append("--upgrade")
+    command.append("-r config/requirements.pip")
+
+    with prefix("umask 0002"):
+        with prefix(env.activate_virtualenv):
+            with cd(env.release_path):
+                sudo(" ".join(command), user=env.app_runner)
 
 
 def make_symlink():
