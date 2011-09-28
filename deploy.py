@@ -4,30 +4,44 @@ from fabric.api import *
 
 @task(default=True)
 def update(upgrade_requirements=False):
-    from config.fabric import server
+    '''Deploy a new version'''
+    from config.fabric import uwsgi
 
-    server.stop()
-    # wsgi.stop()
-    # nginx.maintenance()
-    # TODO: only stop servers when changing the symlink
     checkout_source()
     install_requirements(upgrade_requirements)
+    # TODO: nginx.maintenance()
+    # TODO: warn only, if test pidfile, stop
+    uwsgi.stop()
     make_symlinks()
-    server.start()
+    uwsgi.start()
+    # TODO: nginx.unmaintenance()
     
 
 @task
 def cold():
     '''Bootstrap a cold deployment.  This will create a functioning Olive
     install from nothing.'''
-    from config.fabric import server
+    from config.fabric import uwsgi
 
     setup_virtualenv()
     make_directories()
     checkout_source()
     install_requirements()
     make_symlinks()
-    server.start()
+    uwsgi.start()
+
+@task
+def from_workspace():
+    local("gnutar -czf %(release_name)s.tar *" % env)
+    with prefix("umask 0002"):
+        sudo("mkdir %(release_path)s" % env, user=env.app_runner)
+        put("%(release_name)s.tar" % env, env.release_path)
+        with cd(env.release_path):
+                sudo("tar -zxf %(release_name)s.tar" % env, user=env.app_runner)
+                run("rm %(release_name)s.tar" % env)
+
+    local("rm %(release_name)s.tar" % env)
+    make_symlinks()
 
 
 def setup_virtualenv():
@@ -51,6 +65,7 @@ def make_directories():
             for child in env.shared_children:
                 sudo("mkdir %s" % os.path.join(env.shared_dir, child),
                      user=env.app_runner)
+
 
 def checkout_source():
     # TODO: move this to config/git.py
