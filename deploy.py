@@ -38,7 +38,7 @@ def setup_virtualenv():
 
 def make_directories():
     with prefix("umask 0002"):
-        with cd(env.app_root):
+        with cd(env.deploy_to):
             sudo("mkdir %(releases_dir)s" % env, user=env.app_runner)
             sudo("mkdir %(shared_dir)s" % env, user=env.app_runner)
             for child in env.shared_children:
@@ -64,7 +64,7 @@ def install_requirements():
 
 def make_symlink():
     '''Create a 'current' symlink pointing to a release we just checked out'''
-    with cd(env.app_root):
+    with cd(env.deploy_to):
         with settings(hide('warnings'), warn_only=True):
             sudo("test -L %(current_dir)s && rm %(current_dir)s" % env, user=env.app_runner)
 
