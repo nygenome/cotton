@@ -2,12 +2,14 @@ import tempfile
 import os
 
 from fabric.api import *
+from fabric.contrib.files import exists
 
 def signal(signal, pidfile):
     if exists(pidfile):
-        remote("kill -%s `cat %s`" % (signal, pidfile))
+        return remote("kill -%s `cat %s`" % (signal, pidfile))
     else:
-        print "PID file not found: %s" % pidfile
+        # TODO: should this abort?
+        abort("PID file not found: %s" % pidfile)
 
 def remote(command, shell=True, pty=True, combine_stderr=True):
     '''Runs a remote command using either `run()` or `sudo()`.  If
@@ -23,3 +25,4 @@ def remote(command, shell=True, pty=True, combine_stderr=True):
         else:
             return sudo(command, shell, pty, combine_stderr)
 
+# def running(name, pidfile,

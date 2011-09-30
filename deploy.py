@@ -11,7 +11,8 @@ def update(upgrade_requirements=False):
     checkout_source()
     install_requirements(upgrade_requirements)
     make_symlinks()
-    uwsgi.reload()
+    if uwsgi.running():
+        uwsgi.reload()
     
 
 @task

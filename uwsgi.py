@@ -3,14 +3,17 @@ import os
 from fabric.api import *
 from fabric.contrib.files import exists
 from config.fabric.helpers import signal
-from config.fabric.helpers import generate_conf
 
 @task
-def start():
+def start(warn_on_already_started=False):
     '''Start the uwsgi instance.'''
-    if exists(env.uwsgi_pidfile):
-        abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
+    with settings(warn_only=warn_on_already_started):
+        if exists(env.uwsgi_pidfile):
+            abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
+        
 
+    # TODO: do we want to version this config and nginx's 
+    # config as templates? see fabric.contrib.files.upload_template
     command = [
         os.path.join(env.servers_path, "uwsgi"),
         # "--http :8080", # bypass nginx, run directly on port 8080
@@ -49,6 +52,16 @@ def reload():
 def statistics():
     '''Dump some statistics to the log file'''
     signal("USR1", env.uwsgi_pidfile)
+
+def running():
+    '''Best guess at whether or not this process is running'''
+    if exists(env.uwsgi_pidfile):
+        with settings(hide("warnings"), warn_only=True):
+            result = signal("0", env.uwsgi_pidfile)
+            if result and result.succeeded:
+                return True
+
+    return False
 
 # TODO: rotate logs task?
 
