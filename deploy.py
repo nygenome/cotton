@@ -21,13 +21,16 @@ def cold():
     '''Bootstrap a cold deployment.  This will create a functioning Olive
     install from nothing.'''
     from config.fabric import uwsgi
+    from config.fabric import nginx
 
     setup_virtualenv()
     make_directories()
     checkout_source()
     install_requirements()
     make_symlinks()
+    nginx.update_conf()
     uwsgi.start()
+    nginx.start()
 
 @task
 def from_workspace():
@@ -41,6 +44,7 @@ def from_workspace():
 
     local("rm %(release_name)s.tar" % env)
     make_symlinks()
+    remote("touch %s" % os.path.join(env.current_path, "WORKSPACE_RELEASE"))
 
 
 def setup_virtualenv():

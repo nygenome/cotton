@@ -54,5 +54,5 @@ def statistics():
     '''Dump some statistics to the log file'''
     signal("USR1", env.uwsgi_pidfile)
 
-# TODO: rotate logs task?
+# TODO: log rotation
 
