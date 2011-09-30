@@ -1,6 +1,7 @@
 import os
 
 from fabric.api import *
+from config.fabric.helpers import remote
 
 @task(default=True)
 def update(upgrade_requirements=False):
@@ -30,10 +31,10 @@ def cold():
 def from_workspace():
     local("gnutar -czf %(release_name)s.tar *" % env)
     with prefix("umask 0002"):
-        sudo("mkdir %(release_path)s" % env, user=env.app_runner)
+        remote("mkdir %(release_path)s" % env)
         put("%(release_name)s.tar" % env, env.release_path)
         with cd(env.release_path):
-                sudo("tar -zxf %(release_name)s.tar" % env, user=env.app_runner)
+                remote("tar -zxf %(release_name)s.tar" % env)
                 run("rm %(release_name)s.tar" % env)
 
     local("rm %(release_name)s.tar" % env)
@@ -49,18 +50,17 @@ def setup_virtualenv():
 
     with path("/seq/annotation/development/tools/python/2.7.1/bin", behavior='prepend'):
         with prefix("umask 0002"):
-            sudo(" ".join(virtualenv_cmd), user=env.app_runner)
+            remote(" ".join(virtualenv_cmd))
 
 
 def make_directories():
     with prefix("umask 0002"):
-        sudo("mkdir %(deploy_to)s" % env, user=env.app_runner)
+        remote("mkdir %(deploy_to)s" % env)
         with cd(env.deploy_to):
-            sudo("mkdir %(releases_dir)s" % env, user=env.app_runner)
-            sudo("mkdir %(shared_dir)s" % env, user=env.app_runner)
+            remote("mkdir %(releases_dir)s" % env)
+            remote("mkdir %(shared_dir)s" % env)
             for child in env.shared_children:
-                sudo("mkdir %s" % os.path.join(env.shared_dir, child),
-                     user=env.app_runner)
+                remote("mkdir %s" % os.path.join(env.shared_dir, child))
 
 
 def checkout_source():
@@ -84,21 +84,21 @@ def install_requirements(upgrade=False):
     with prefix("umask 0002"):
         with prefix(env.activate_virtualenv):
             with cd(env.release_path):
-                sudo(" ".join(command), user=env.app_runner)
+                remote(" ".join(command))
 
 
 def make_symlinks():
     '''Create a 'current' symlink pointing to a release we just checked 
     out, and symlinks within pointing to the shared children'''
     with settings(hide('warnings'), warn_only=True):
-        sudo("test -L %(current_path)s && rm %(current_path)s" % env, user=env.app_runner)
+        remote("test -L %(current_path)s && rm %(current_path)s" % env)
 
-    sudo("ln -s %(release_path)s %(current_path)s" % env, user=env.app_runner)
+    remote("ln -s %(release_path)s %(current_path)s" % env)
     for child in env.shared_children:
-        sudo("ln -s %s %s" % (
+        remote("ln -s %s %s" % (
             os.path.join(env.shared_path, child),
             os.path.join(env.release_path, child)
-        ), user=env.app_runner)
+        ))
 
 
 

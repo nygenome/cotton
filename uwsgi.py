@@ -1,10 +1,16 @@
 import os
 
 from fabric.api import *
+from fabric.contrib.files import exists
+from config.fabric.helpers import signal
+from config.fabric.helpers import generate_conf
 
 @task
 def start():
     '''Start the uwsgi instance.'''
+    if exists(env.uwsgi_pidfile):
+        abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
+
     command = [
         os.path.join(env.servers_path, "uwsgi"),
         # "--http :8080", # bypass nginx, run directly on port 8080
@@ -13,40 +19,36 @@ def start():
         "--virtualenv %(virtualenv_path)s" % env,
         "--chdir %(current_path)s" % env,
         "--logdate",
+        "--master",
         "--pidfile %(uwsgi_pidfile)s" % env,
         "--vacuum",
         "--module martini",
         "--callable app"
     ]
     with cd(env.current_path):
-        sudo(" ".join(command), user=env.app_runner)
+        remote(" ".join(command))
 
 
 @task
 def stop():
     '''Stops the uwsgi instance, if the pidfile is present'''
-    with settings(hide('warnings'), warn_only=True):
-        if sudo("test -e %(uwsgi_pidfile)s" % env, user=env.app_runner).failed:
-            print "PID file not found: %(uwsgi_pidfile)s" % env
-            return
-
-    signal("INT")
+    signal("INT", env.uwsgi_pidfile)
 
 
 @task
 def restart():
+    '''Hard restart of the master uwsgi process'''
+    signal("TERM", env.uwsgi_pidfile)
+
+@task
+def reload():
     '''Gracefully reload the master uwsgi process and workers'''
-    signal("HUP")
+    signal("HUP", env.uwsgi_pidfile)
 
 @task
 def statistics():
-    signal("USR1")
+    '''Dump some statistics to the log file'''
+    signal("USR1", env.uwsgi_pidfile)
 
 # TODO: rotate logs task?
-
-def signal(signal):
-    sudo("kill -%s `cat %s`" % (
-        signal,
-        env.uwsgi_pidfile
-    ), user=env.app_runner)
 
