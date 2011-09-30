@@ -17,7 +17,7 @@ def remote(command, shell=True, pty=True, combine_stderr=True):
     `run()` is used.  Using sudo, if `env.sudo_user` is set, the value of
     that expression will be passed to `sudo()` as the `user` parameter.
     Otherwise, the command will be executed without a `user` parameter.'''
-    if env.has_key("use_sudo") and env.use_sudo:
+    if not (env.has_key("use_sudo") and env.use_sudo):
         return run(command, shell, pty, combine_stderr)
     else:
         if env.has_key("sudo_user"):
@@ -25,4 +25,3 @@ def remote(command, shell=True, pty=True, combine_stderr=True):
         else:
             return sudo(command, shell, pty, combine_stderr)
 
-# def running(name, pidfile,

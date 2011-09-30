@@ -1,6 +1,7 @@
 import os
 
 from fabric.api import *
+from fabric.contrib.files import exists
 from config.fabric.helpers import remote
 
 @task(default=True)
@@ -11,7 +12,7 @@ def update(upgrade_requirements=False):
     checkout_source()
     install_requirements(upgrade_requirements)
     make_symlinks()
-    if uwsgi.running():
+    if exists(env.uwsgi_pidfile):
         uwsgi.reload()
     
 

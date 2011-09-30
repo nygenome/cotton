@@ -3,6 +3,8 @@ import os
 from fabric.api import *
 from fabric.contrib.files import exists
 from config.fabric.helpers import signal
+from config.fabric.helpers import remote
+
 
 @task
 def start(warn_on_already_started=False):
@@ -52,16 +54,6 @@ def reload():
 def statistics():
     '''Dump some statistics to the log file'''
     signal("USR1", env.uwsgi_pidfile)
-
-def running():
-    '''Best guess at whether or not this process is running'''
-    if exists(env.uwsgi_pidfile):
-        with settings(hide("warnings"), warn_only=True):
-            result = signal("0", env.uwsgi_pidfile)
-            if result and result.succeeded:
-                return True
-
-    return False
 
 # TODO: rotate logs task?
 
