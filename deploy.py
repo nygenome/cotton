@@ -29,6 +29,7 @@ def cold():
     install_requirements()
     make_symlinks()
     nginx.update_conf()
+    uwsgi.update_conf()
     uwsgi.start()
     nginx.start()
 
