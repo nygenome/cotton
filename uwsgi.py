@@ -7,11 +7,10 @@ from config.fabric.helpers import remote
 
 
 @task
-def start(warn_on_already_started=False):
+def start():
     '''Start the uwsgi instance.'''
-    with settings(warn_only=warn_on_already_started):
-        if exists(env.uwsgi_pidfile):
-            abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
+    if exists(env.uwsgi_pidfile):
+        abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
         
 
     # TODO: do we want to version this config and nginx's 
