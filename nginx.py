@@ -14,7 +14,7 @@ def start():
         
 
     command = [
-        os.path.join(env.servers_path, "nginx"),
+        os.path.join(env.servers_path, "bin", "nginx"),
         "-c %(nginx_conf)s" % env,
     ]
     with cd(env.current_path):
