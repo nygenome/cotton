@@ -13,23 +13,9 @@ def start():
     if exists(env.uwsgi_pidfile):
         abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
         
-
-    # TODO: do we want to version this config and nginx's 
-    # config as templates? see fabric.contrib.files.upload_template
     command = [
         os.path.join(env.servers_path, "bin", "uwsgi"),
         "--yml %(uwsgi_conf)s" % env
-        # # "--http :8080", # bypass nginx, run directly on port 8080
-        # "--socket %(uwsgi_socket)s" % env,
-        # "--daemonize %s" % os.path.join(env.shared_path, "log", "uwsgi.log"),
-        # "--virtualenv %(virtualenv_path)s" % env,
-        # "--chdir %(current_path)s" % env,
-        # "--logdate",
-        # "--master",
-        # "--pidfile %(uwsgi_pidfile)s" % env,
-        # "--vacuum",
-        # "--module martini",
-        # "--callable app"
     ]
     with cd(env.current_path):
         remote(" ".join(command))
