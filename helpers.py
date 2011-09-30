@@ -23,23 +23,3 @@ def remote(command, shell=True, pty=True, combine_stderr=True):
         else:
             return sudo(command, shell, pty, combine_stderr)
 
-
-def generate_conf(template_file_path, interpolation_dict):
-    '''Given a template file with python interpolation format strings, render
-    a new (temporary) file from interpolating that file with the 
-    `interpolation_dict`.  `template_file_path` should be relative to the
-    repository root.  Returns the path to the temporary file.'''
-
-
-    # TODO: move this to some kind of scm.cat_file functionality
-    # env.source.cat_file(template_file_path)
-    conf_data = local("git show HEAD:%s" % template_file_path, capture=True)
-    conf_data = conf_data % interpolation_dict
-
-    conf_file, conf_file_path = tempfile.mkstemp()
-
-    os.write(conf_file, conf_data)
-    os.close(conf_file)
-
-    return conf_file_path
-
