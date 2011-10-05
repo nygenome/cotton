@@ -106,6 +106,8 @@ def make_symlinks():
             os.path.join(env.shared_path, child),
             os.path.join(env.release_path, child)
         ))
+    
+    # TODO: ln -s config/production.py config/local.py
 
 
 
