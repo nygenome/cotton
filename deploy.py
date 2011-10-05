@@ -10,6 +10,7 @@ def update(upgrade_requirements=False):
     from config.fabric import uwsgi
 
     checkout_source()
+    install_config()
     install_requirements(upgrade_requirements)
     make_symlinks()
     if exists(env.uwsgi_pidfile):
@@ -26,6 +27,7 @@ def cold():
     setup_virtualenv()
     make_directories()
     checkout_source()
+    install_config()
     install_requirements()
     make_symlinks()
     nginx.update_conf()
@@ -107,7 +109,12 @@ def make_symlinks():
             os.path.join(env.release_path, child)
         ))
     
-    # TODO: ln -s config/production.py config/local.py
+def install_config():
+    config_dir = os.path.join(env.release_path, "config")
 
+    remote("ln -s %(production)s %(local)s" % {
+        "production": os.path.join(config_dir, "production.py"),
+        "local": os.path.join(config_dir, "local.py")
+    })
 
 
