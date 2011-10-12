@@ -44,8 +44,10 @@ def from_workspace():
         with cd(env.release_path):
                 remote("tar -zxf %(release_name)s.tar" % env)
                 run("rm %(release_name)s.tar" % env)
+                remote("rm -f config/local.py" % env)
 
     local("rm %(release_name)s.tar" % env)
+    install_config()
     make_symlinks()
     remote("touch %s" % os.path.join(env.current_path, "WORKSPACE_RELEASE"))
 
