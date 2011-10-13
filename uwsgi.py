@@ -19,6 +19,7 @@ def start():
     ]
     with cd(env.current_path):
         remote(" ".join(command))
+        puts("*** ignore unlink() error - uwsgi quirk as of 0.9.9.2") 
 
 
 @task

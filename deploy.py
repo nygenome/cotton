@@ -81,6 +81,7 @@ def checkout_source():
     with prefix("umask 0002"):
         run("git clone %(scm_repository)s %(release_path)s" % env)
         run("rm -rf %s" % os.path.join(env.release_path, ".git"))
+        puts("*** find error is git quirk when running from a remote pty, ignore..")
 
 
 def install_requirements(upgrade=False):
