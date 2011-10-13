@@ -44,12 +44,12 @@ def from_workspace():
         with cd(env.release_path):
                 remote("tar -zxf %(release_name)s.tar" % env)
                 run("rm %(release_name)s.tar" % env)
-                remote("rm -f config/local.py" % env)
 
     local("rm %(release_name)s.tar" % env)
+    remote("rm -f %(release_path)s/config/local.py" % env)
     install_config()
     make_symlinks()
-    remote("touch %s" % os.path.join(env.current_path, "WORKSPACE_RELEASE"))
+    make_workspace_file()
 
 
 def setup_virtualenv():
@@ -111,6 +111,19 @@ def make_symlinks():
             os.path.join(env.shared_path, child),
             os.path.join(env.release_path, child)
         ))
+        
+
+def make_workspace_file():
+    """Create a tag file that announces that a particular release is
+    was made from a working copy, rather than from version control."""
+
+    ws_file = os.path.join(env.current_path, "WORKSPACE_RELEASE")
+    ws_host = local("hostname", capture=True)
+    ws_string = "Installed from %s@%s:%s at %s" % (os.environ['USER'],
+                                                   ws_host,
+                                                   os.environ['PWD'],
+                                                   env.release_name)
+    remote("echo \"%s\" > %s" % (ws_string, ws_file))
     
 def install_config():
     config_dir = os.path.join(env.release_path, "config")
