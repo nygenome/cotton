@@ -34,7 +34,8 @@ def reload():
 
 @task
 def update_conf():
-    upload_template(env.nginx_conf_template,
-                    env.nginx_conf,
-                    context=env,
-                    mode=0664)
+    with prefix("umask 0002"):
+        upload_template(env.nginx_conf_template,
+                        env.nginx_conf,
+                        context=env,
+                        mode=0664)

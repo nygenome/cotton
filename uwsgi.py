@@ -49,7 +49,8 @@ def update_conf():
     '''Updates the uwsgi conf file on the server, using the template.  Leaves
     a backup file in the uwsgi conf directory with a .bak extension.  Use this
     to roll back if necessary'''
-    upload_template(env.uwsgi_conf_template,
-                    env.uwsgi_conf,
-                    context=env,
-                    mode=0664)
+    with prefix("umask 0002"):
+        upload_template(env.uwsgi_conf_template,
+                        env.uwsgi_conf,
+                        context=env,
+                        mode=0664)
