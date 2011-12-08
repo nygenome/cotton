@@ -10,7 +10,7 @@ from config.fabric.helpers import remote
 def start():
     '''Start the nginx instance.'''
     if exists(env.nginx_pidfile):
-        abort("uwsgi pidfile already exists: %(host)s:%(nginx_pidfile)s" % env)
+        abort("nginx pidfile already exists: %(host)s:%(nginx_pidfile)s" % env)
         
 
     command = [
