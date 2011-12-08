@@ -11,7 +11,6 @@ def start():
     '''Start the nginx instance.'''
     if exists(env.nginx_pidfile):
         abort("nginx pidfile already exists: %(host)s:%(nginx_pidfile)s" % env)
-        
 
     command = [
         os.path.join(env.servers_path, "bin", "nginx"),
