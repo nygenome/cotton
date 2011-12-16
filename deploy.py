@@ -9,6 +9,7 @@ def update(upgrade_requirements=False):
     '''Deploy a new version'''
     from config.fabric import uwsgi
 
+    authenticate()
     checkout_source()
     install_config()
     install_requirements(upgrade_requirements)
@@ -79,9 +80,9 @@ def checkout_source():
     # TODO: cached copy strategy
     # TODO: submodules
     with prefix("umask 0002"):
+        puts("*** find error is git quirk when running from a remote pty, ignore..")
         run("git clone %(scm_repository)s %(release_path)s" % env)
         run("rm -rf %s" % os.path.join(env.release_path, ".git"))
-        puts("*** find error is git quirk when running from a remote pty, ignore..")
 
 
 def install_requirements(upgrade=False):
@@ -133,4 +134,7 @@ def install_config():
         "local": os.path.join(config_dir, "local.py")
     })
 
+def authenticate():
+    with settings(hide('running')):
+        remote('echo "Authenticating..."')
 
