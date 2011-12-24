@@ -119,8 +119,8 @@ def checkout_source():
         run("git clone %(scm_repository)s %(release_path)s" % env)
         git_dir = os.path.join(env.release_path, ".git")
         with cd(env.release_path):
-            run("git log | head -n 1 > %s" % os.path.join(env.release_path,
-                                                          "REVISION"))
+            run("git rev-parse HEAD > %s" % os.path.join(env.release_path,
+                                                         "REVISION"))
         run("rm -rf %s" % git_dir)
 
 
