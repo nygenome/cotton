@@ -118,8 +118,9 @@ def checkout_source():
         puts("*** find error is git quirk when running from a remote pty, ignore..")
         run("git clone %(scm_repository)s %(release_path)s" % env)
         git_dir = os.path.join(env.release_path, ".git")
-        run("git log | head -n 1 > %s" % os.path.join(env.release_path,
-                                                      "REVISION"))
+        with cd(env.release_path):
+            run("git log | head -n 1 > %s" % os.path.join(env.release_path,
+                                                          "REVISION"))
         run("rm -rf %s" % git_dir)
 
 
