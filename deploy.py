@@ -144,7 +144,9 @@ def make_symlinks(release_path=env.release_path):
     remote("ln -s %s %s" % (release_path, env.current_path))
     for child in env.shared_children:
         child_path = os.path.join(release_path, child)
-        remote("test -L %s && rm %s" % (child_path, child_path))
+        with settings(hide('warnings'), warn_only=True):
+            remote("test -L %s && rm %s" % (child_path, child_path))
+
         remote("ln -s %s %s" % (
             os.path.join(env.shared_path, child),
             child_path
@@ -169,7 +171,9 @@ def install_config(release_path=env.release_path):
         "production": os.path.join(config_dir, "production.py"),
         "local": os.path.join(config_dir, "local.py")
     }
-    remote("test -L %(local)s && rm %(local)s" % paths)
+    with settings(hide('warnings'), warn_only=True):
+        remote("test -L %(local)s && rm %(local)s" % paths)
+
     remote("ln -s %(production)s %(local)s" % paths)
 
 def authenticate():
