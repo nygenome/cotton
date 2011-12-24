@@ -183,5 +183,6 @@ def install_config(release_path=env.release_path):
 def authenticate():
     with settings(hide('running')):
         run('echo "Authenticating..."')
-        remote('echo')
+        with settings(hide('stdout')):
+            remote('echo -n')
 
