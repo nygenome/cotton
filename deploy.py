@@ -85,9 +85,6 @@ def find_canonical_current_release():
 
     return current
 
-def clean_requirements():
-    pass # TODO: implement clean_requirements - fresh venv somehow
-
 def setup_virtualenv():
     virtualenv_cmd = ["virtualenv",
                       "--distribute",
