@@ -5,26 +5,30 @@ from fabric.contrib.files import exists
 from config.fabric.helpers import remote
 
 @task(default=True)
-def update(upgrade_requirements=False):
-    '''Deploy a new version from origin/master.'''
+def update(run_tests=True):
+    '''Deploy a new version from origin/master. Pass :run_tests=0 to
+    skip the automated tests and deploy anyway.
+    '''
     from config.fabric import uwsgi
 
+    test_locally(run_tests)
     authenticate()
     checkout_source()
     install_config()
-    install_requirements(upgrade=upgrade_requirements)
+    install_requirements()
     make_symlinks()
     if exists(env.uwsgi_pidfile):
         uwsgi.reload()
-    
 
 @task
-def cold():
+def cold(run_tests=True):
     '''Bootstrap a cold deployment.  This will create a functioning Olive
     install from nothing.'''
     from config.fabric import uwsgi
     from config.fabric import nginx
 
+    test_locally(run_tests)
+    authenticate()
     setup_virtualenv()
     make_directories()
     checkout_source()
@@ -37,9 +41,12 @@ def cold():
     nginx.start()
 
 @task
-def from_workspace():
+def from_workspace(run_tests=True):
     '''Deploy a new version from this working copy.  Not for use unless
     circumstances require.'''
+
+    test_locally(run_tests)
+    authenticate()
     local("gnutar -czf %(release_name)s.tar *" % env)
     with prefix("umask 0002"):
         remote("mkdir %(release_path)s" % env)
@@ -183,3 +190,13 @@ def authenticate():
         with settings(hide('stdout')):
             remote('echo -n')
 
+def test_locally(run_tests=True):
+    run_tests = to_boolean(run_tests)
+    if run_tests:
+        local("nosetests")
+
+def to_boolean(obj):
+    if type(obj) == type(''):
+        if obj.lower() in ['0', 'false']:
+            return False
+    return bool(obj)
