@@ -44,3 +44,24 @@ def update_conf():
                         env.redis_conf,
                         context=env,
                         mode=0664)
+        
+
+
+def redis_cli(commands = []):
+    if type(commands) == type(''):
+        commands = commands.split(' ')
+    commands.insert(0, os.path.join(env.servers_path, "bin", "redis-cli"))
+    return " ".join(commands)
+
+@task
+def cli():
+    with prefix("TERM=dumb"):
+        run(redis_cli())
+
+
+@task
+def flush():
+    '''Clears the entire contents of the production cache.'''
+    run(redis_cli("flushall"))
+
+
