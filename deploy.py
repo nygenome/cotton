@@ -68,10 +68,17 @@ def rollback():
     from config.fabric import uwsgi
 
     uwsgi.stop()
+    
+    current_release = find_canonical_current_release()
+
     target = os.path.join(env.releases_path, find_previous_release())
     install_config(release_path=target)
     install_requirements(release_path=target)
     make_symlinks(release_path=target)
+
+    with cd(env.releases_path):
+        remote("rm -rf %s" % current_release)
+
     uwsgi.start()
 
 def find_previous_release():
