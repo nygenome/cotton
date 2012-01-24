@@ -4,6 +4,11 @@ from fabric.api import *
 from fabric.contrib.files import exists
 from config.fabric.helpers import remote
 
+@task 
+def ls():
+    with cd(env.current_path):
+        run("uname -n; pwd -P; ls")
+
 @task(default=True)
 def update(run_tests=True):
     '''Deploy a new version from origin/master. Pass :run_tests=0 to
@@ -14,9 +19,9 @@ def update(run_tests=True):
     test_locally(run_tests)
     authenticate()
     checkout_source()
-    install_config()
-    install_requirements()
-    make_symlinks()
+    install_config(env.release_path)
+    install_requirements(env.release_path)
+    make_symlinks(env.release_path)
     if exists(env.uwsgi_pidfile):
         uwsgi.reload()
 
@@ -32,9 +37,9 @@ def cold(run_tests=True):
     setup_virtualenv()
     make_directories()
     checkout_source()
-    install_config()
-    install_requirements()
-    make_symlinks()
+    install_config(env.release_path)
+    install_requirements(env.release_path)
+    make_symlinks(env.release_path)
     nginx.update_conf()
     uwsgi.update_conf()
     uwsgi.start()
@@ -57,8 +62,8 @@ def from_workspace(run_tests=True):
 
     local("rm %(release_name)s.tar" % env)
     remote("rm -f %(release_path)s/config/local.py" % env)
-    install_config()
-    make_symlinks()
+    install_config(env.release_path)
+    make_symlinks(env.release_path)
     make_workspace_file()
 
 @task
@@ -72,9 +77,9 @@ def rollback():
     current_release = find_canonical_current_release()
 
     target = os.path.join(env.releases_path, find_previous_release())
-    install_config(release_path=target)
-    install_requirements(release_path=target)
-    make_symlinks(release_path=target)
+    install_config(target)
+    install_requirements(target)
+    make_symlinks(target)
 
     with cd(env.releases_path):
         remote("rm -rf %s" % current_release)
@@ -135,7 +140,7 @@ def checkout_source():
         run("rm -rf %s" % git_dir)
 
 
-def install_requirements(release_path=env.release_path, upgrade=False):
+def install_requirements(release_path, upgrade=False):
     '''Install requirements into pip from config/requirements.pip'''
     command = []
     command.append("pip")
@@ -150,7 +155,7 @@ def install_requirements(release_path=env.release_path, upgrade=False):
                 remote(" ".join(command))
 
 
-def make_symlinks(release_path=env.release_path):
+def make_symlinks(release_path):
     '''Create a 'current' symlink pointing to a release we just checked 
     out, and symlinks within pointing to the shared children'''
     with settings(hide('warnings'), warn_only=True):
@@ -180,16 +185,16 @@ def make_workspace_file():
                                                    env.release_name)
     remote("echo \"%s\" > %s" % (ws_string, ws_file))
     
-def install_config(release_path=env.release_path):
+def install_config(release_path):
     config_dir = os.path.join(release_path, "config")
     paths = {
-        "production": os.path.join(config_dir, "production.py"),
+        "deploy": os.path.join(config_dir, "%s.py" % env.configuration_name),
         "local": os.path.join(config_dir, "local.py")
     }
     with settings(hide('warnings'), warn_only=True):
         remote("test -L %(local)s && rm %(local)s" % paths)
 
-    remote("ln -s %(production)s %(local)s" % paths)
+    remote("ln -s %(deploy)s %(local)s" % paths)
 
 def authenticate():
     with settings(hide('running')):
