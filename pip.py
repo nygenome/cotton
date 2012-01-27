@@ -20,7 +20,6 @@ def pip(command):
         with prefix(env.activate_virtualenv):
             remote("pip %s" % command)
 
-@task
 def sanitize(command):
     '''Shell injection protection'''
     if re.search('[;&|\\\'\"]', command):
