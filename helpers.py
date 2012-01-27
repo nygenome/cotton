@@ -1,5 +1,6 @@
 import tempfile
 import os
+import errno
 
 from fabric.api import *
 from fabric.contrib.files import exists
@@ -25,3 +26,12 @@ def remote(command, shell=True, pty=True, combine_stderr=True):
         else:
             return sudo(command, shell, pty, combine_stderr)
 
+def makedirs(path):
+    '''mkdir -p functionality'''
+    import os, errno
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST:
+            pass
+        else: raise exc

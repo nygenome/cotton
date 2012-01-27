@@ -5,7 +5,8 @@ from fabric.contrib.files import exists
 from config.fabric.helpers import remote
 
 @task 
-def ls():
+def whereami():
+    '''Displays some information about where this task is running.'''
     with cd(env.current_path):
         run("uname -n; pwd -P; ls")
 
@@ -34,7 +35,7 @@ def cold(run_tests=True):
 
     test_locally(run_tests)
     authenticate()
-    setup_virtualenv()
+    setup_virtualenv(env.virtualenv_path)
     make_directories()
     checkout_source()
     install_config(env.release_path)
@@ -104,12 +105,12 @@ def find_canonical_current_release():
 
     return current
 
-def setup_virtualenv():
+def setup_virtualenv(virtualenv_path):
     virtualenv_cmd = ["virtualenv",
                       "--distribute",
                       "--no-site-packages",
                       "-p python2.7",
-                      "%s" % env.virtualenv_path]
+                      "%s" % virtualenv_path]
 
     with path("/seq/annotation/development/tools/python/2.7.1/bin", behavior='prepend'):
         with prefix("umask 0002"):
