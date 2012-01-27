@@ -7,7 +7,7 @@ from config.fabric.helpers import makedirs
 
 @task
 def start():
-    sentry("start --config=%(sentry_config)s" % env)
+    sentry("start --daemon")
 
 @task
 def stop():
@@ -16,6 +16,10 @@ def stop():
 @task
 def restart():
     sentry("restart")
+
+@task 
+def update_schema():
+    sentry("upgrade")
 
 @task
 def install():
@@ -28,11 +32,12 @@ def install():
             remote("pip install sentry")
 
     update_conf()
+    update_schema()
 
 def sentry(command):
     with prefix("umask 0002"):
         with prefix(env.sentry_activate_virtualenv):
-            remote("sentry %s" % command)
+            remote("sentry %s --config=%s" % (command, env.sentry_conf))
 
 @task
 def update_conf():
