@@ -35,6 +35,10 @@ def install(source=None):
             run("make")
             run("make install")
 
+        with cd(os.path.join(env.servers_path, 'bin')):
+            run("ln -s %s" % os.path.join(env.monit_root, 'bin', 'monit'))
+
+
 @task
 def start():
     monit()
