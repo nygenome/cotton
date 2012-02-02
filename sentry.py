@@ -22,15 +22,22 @@ def update_schema():
     sentry("upgrade")
 
 @task
+def upgrade_sentry():
+    '''Upgrade sentry to the latest version.  Sentry must be stopped first.'''
+    # stop sentry.  if it stopped, then start again post upgrade
+    with prefix("umask 0002"):
+        with prefix(env.sentry_activate_virtualenv):
+            remote("pip install --upgrade sentry")
+
+
+@task
 def install():
     '''Installs sentry, if it's not installed in the requested environment'''
     from config.fabric import deploy
     makedirs(env.sentry_root)
     deploy.setup_virtualenv(env.sentry_virtualenv_path)
-    with prefix("umask 0002"):
-        with prefix(env.sentry_activate_virtualenv):
-            remote("pip install sentry")
 
+    upgrade_sentry()
     update_conf()
     update_schema()
 
