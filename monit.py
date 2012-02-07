@@ -64,9 +64,11 @@ def monit(command=None):
 def update_conf():
     with prefix("umask 0002"):
         run("mkdir -p %s" % os.path.dirname(env.monit_conf))
+        remote("mv %(monit_conf)s{,.bak}" % env)
         upload_template(env.monit_conf_template,
                         env.monit_conf,
                         context=env,
+                        backup=False,
                         mode=0664)
         remote("mv %(monit_conf)s %(monit_conf)s.tmp" % env)
         remote("cp %(monit_conf)s.tmp %(monit_conf)s" % env)
