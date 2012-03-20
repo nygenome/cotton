@@ -12,14 +12,18 @@ def start():
     '''Start the uwsgi instance.'''
     if exists(env.uwsgi_pidfile):
         abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
-        
+
+    # TODO: ARRRRRG you can't source files in sudo
+    # As long as we're using 1.1 built with our custom-build pcre
+    # library, we need to tell uwsgi where to find this
     command = [
+        "LD_LIBRARY_PATH=/seq/a2e0/tools/util/pcre/pcre-8.30/lib",
         os.path.join(env.servers_path, "bin", "uwsgi"),
-        "--yml %(uwsgi_conf)s" % env
+        "--yaml %(uwsgi_conf)s" % env
     ]
     with cd(env.current_path):
         remote(" ".join(command))
-        puts("*** ignore unlink() error - uwsgi quirk as of 0.9.9.2") 
+        puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1") 
 
 
 @task
