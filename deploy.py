@@ -46,14 +46,24 @@ def cold(run_tests=True):
     uwsgi.start()
     nginx.start()
 
+def choose_local_tar():
+    with settings(hide('everything')):
+        host_os = local("uname", capture=True)
+
+    if host_os == 'Darwin':
+        return 'gnutar'
+    return 'tar'
+
 @task
 def from_workspace(run_tests=True):
     '''Deploy a new version from this working copy.  Not for use unless
     circumstances require.'''
 
+    from config.fabric import uwsgi
+
     test_locally(run_tests)
     authenticate()
-    local("gnutar -czf %(release_name)s.tar *" % env)
+    local(choose_local_tar() + (" -czf %(release_name)s.tar *" % env))
     with prefix("umask 0002"):
         remote("mkdir %(release_path)s" % env)
         put("%(release_name)s.tar" % env, env.release_path)
@@ -66,6 +76,8 @@ def from_workspace(run_tests=True):
     install_config(env.release_path)
     make_symlinks(env.release_path)
     make_workspace_file()
+    if exists(env.uwsgi_pidfile):
+        uwsgi.reload()
 
 @task
 def rollback():
