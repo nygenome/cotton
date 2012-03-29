@@ -22,6 +22,7 @@ def update(run_tests=True):
     checkout_source()
     install_config(env.release_path)
     install_requirements(env.release_path)
+    make_shared_children_dirs()
     make_symlinks(env.release_path)
     if exists(env.uwsgi_pidfile):
         uwsgi.reload()
@@ -74,6 +75,7 @@ def from_workspace(run_tests=True):
     local("rm %(release_name)s.tar" % env)
     remote("rm -f %(release_path)s/config/local.py" % env)
     install_config(env.release_path)
+    make_shared_children_dirs()
     make_symlinks(env.release_path)
     make_workspace_file()
     if exists(env.uwsgi_pidfile):
@@ -135,8 +137,12 @@ def make_directories():
         with cd(env.deploy_to):
             remote("mkdir %(releases_dir)s" % env)
             remote("mkdir %(shared_dir)s" % env)
-            for child in env.shared_children:
-                remote("mkdir %s" % os.path.join(env.shared_dir, child))
+            make_shared_children_dirs()
+
+def make_shared_children_dirs():
+    for child in env.shared_children:
+        with cd(env.shared_path):
+            remote("test -d %s || mkdir %s" % (child, child))
 
 
 def checkout_source():
