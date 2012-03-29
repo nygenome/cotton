@@ -22,8 +22,9 @@ def start():
         "--yaml %(uwsgi_conf)s" % env
     ]
     with cd(env.current_path):
-        remote(" ".join(command))
-        puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1") 
+        with prefix("umask 0002"):
+            remote(" ".join(command))
+            puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1")
 
 
 @task
