@@ -1,0 +1,66 @@
+# taken from https://github.com/github/gitignore
+config/local.py
+.ipythonrc.py
+
+#
+# Django
+#
+*.log
+
+#
+# Python
+#
+*.py[co]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+log
+logs
+develop-eggs
+.installed.cfg
+
+# Installer logs
+pip-log.txt
+
+#
+# Unit test / coverage reports
+#
+.coverage
+.tox
+
+#
+# Vim
+#
+.*.sw[a-z]
+.sw[a-z]
+*.un~
+Session.vim
+
+#
+# Emacs
+#
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+.\#*
+.elc
+auto-save-list
+tramp
+
+#
+# OSX
+#
+.DS_Store
+Icon?
+# Thumbnails
+._*
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
