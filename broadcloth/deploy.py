@@ -1,3 +1,31 @@
+'''
+Controls deployment of releases.
+
+Uses the following env settings:
+    Defined:
+        * blah
+
+    Derived:
+        * blah
+
+    Called:
+        * activate_virtualenv
+        * configuration_name
+        * current_path
+        * deploy_to
+        * release_name
+        * release_path
+        * release_dir
+        * shared_dir
+        * scm_repository
+        * releases_path
+        * shared_children
+        * shared_path
+        * uwsgi_pidfile
+        * virtualenv_path
+      
+
+'''
 import os
 
 from fabric.api import *
@@ -29,7 +57,7 @@ def update(run_tests=True):
 
 @task
 def cold(run_tests=True):
-    '''Bootstrap a cold deployment.  This will create a functioning Olive
+    '''Bootstrap a cold deployment.  This will create a functioning
     install from nothing.'''
     from broadcloth import uwsgi
     from broadcloth import nginx
@@ -126,6 +154,7 @@ def setup_virtualenv(virtualenv_path):
                       "-p python2.7",
                       "%s" % virtualenv_path]
 
+    # TODO: extract to variable
     with path("/seq/annotation/development/tools/python/2.7.1/bin", behavior='prepend'):
         with prefix("umask 0002"):
             remote(" ".join(virtualenv_cmd))
@@ -215,6 +244,7 @@ def install_config(release_path):
 
     remote("ln -s %(deploy)s %(local)s" % paths)
 
+# TODO: move authenticate to helpers
 def authenticate():
     with settings(hide('running')):
         run('echo "Authenticating..."')
