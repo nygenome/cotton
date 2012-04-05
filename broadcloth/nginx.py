@@ -3,8 +3,8 @@ import os
 from fabric.api import *
 from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
-from config.fabric.helpers import signal
-from config.fabric.helpers import remote
+from broadcloth.helpers import signal
+from broadcloth.helpers import remote
 
 @task
 def start():

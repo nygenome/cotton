@@ -1,4 +1,4 @@
-from config.fabric.deploy import authenticate
+from broadcloth.deploy import authenticate
 
 from fabric.api import env, task, run, prefix
 

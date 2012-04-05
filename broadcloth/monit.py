@@ -3,8 +3,8 @@ import os
 from fabric.api import env, task, run, cd, prefix
 from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
-from config.fabric.helpers import signal
-from config.fabric.helpers import remote
+from broadcloth.helpers import signal
+from broadcloth.helpers import remote
 
 default_location = "http://mmonit.com/monit/dist/monit-5.3.2.tar.gz"
 

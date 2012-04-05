@@ -2,8 +2,8 @@ import os
 
 from fabric.api import task, env, prefix
 from fabric.contrib.files import upload_template
-from config.fabric.helpers import remote
-from config.fabric.helpers import makedirs
+from broadcloth.helpers import remote
+from broadcloth.helpers import makedirs
 
 @task
 def start():
@@ -33,7 +33,7 @@ def upgrade_sentry():
 @task
 def install():
     '''Installs sentry, if it's not installed in the requested environment'''
-    from config.fabric import deploy
+    from broadcloth import deploy
     makedirs(env.sentry_root)
     deploy.setup_virtualenv(env.sentry_virtualenv_path)
 

@@ -2,7 +2,7 @@ import os
 
 from fabric.api import *
 from fabric.contrib.files import exists
-from config.fabric.helpers import remote
+from broadcloth.helpers import remote
 
 @task 
 def whereami():
@@ -15,7 +15,7 @@ def update(run_tests=True):
     '''Deploy a new version from origin/master. Pass :run_tests=0 to
     skip the automated tests and deploy anyway.
     '''
-    from config.fabric import uwsgi
+    from broadcloth import uwsgi
 
     test_locally(run_tests)
     authenticate()
@@ -31,8 +31,8 @@ def update(run_tests=True):
 def cold(run_tests=True):
     '''Bootstrap a cold deployment.  This will create a functioning Olive
     install from nothing.'''
-    from config.fabric import uwsgi
-    from config.fabric import nginx
+    from broadcloth import uwsgi
+    from broadcloth import nginx
 
     test_locally(run_tests)
     authenticate()
@@ -60,7 +60,7 @@ def from_workspace(run_tests=True):
     '''Deploy a new version from this working copy.  Not for use unless
     circumstances require.'''
 
-    from config.fabric import uwsgi
+    from broadcloth import uwsgi
 
     test_locally(run_tests)
     authenticate()
@@ -85,7 +85,7 @@ def from_workspace(run_tests=True):
 def rollback():
     '''Rolls back the install to the most recent release that is prior to
     the current release.'''
-    from config.fabric import uwsgi
+    from broadcloth import uwsgi
 
     uwsgi.stop()
     

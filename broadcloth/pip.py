@@ -1,7 +1,7 @@
 import re
 
 from fabric.api import *
-from config.fabric.helpers import remote
+from broadcloth.helpers import remote
 
 @task
 def freeze():
