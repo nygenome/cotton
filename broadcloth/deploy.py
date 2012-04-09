@@ -27,6 +27,7 @@ Uses the following env settings:
 
 '''
 import os
+import time
 
 from fabric.api import *
 from fabric.contrib.files import exists
