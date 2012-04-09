@@ -6,6 +6,15 @@ from fabric.contrib.files import upload_template
 from broadcloth.helpers import signal
 from broadcloth.helpers import remote
 
+from broadcloth import set_env, register_setup
+
+def setup(**overrides):
+    set_env("uwsgi_pidfile", os.path.join(env.shared_path, "pids", "uwsgi.pid"), **overrides)
+    set_env("uwsgi_logfile", os.path.join(env.shared_path, "logs", "uwsgi.log"), **overrides)
+    set_env("uwsgi_socket", os.path.join(env.shared_path, "sock", "uwsgi.sock"), **overrides)
+    set_env("uwsgi_conf_template", os.path.join("config", "servers", "uwsgi.template.yml"), **overrides)
+    set_env("uwsgi_conf", os.path.join(env.servers_path, "uwsgi", "conf", "uwsgi.yml"), **overrides)
+register_setup(setup)
 
 @task
 def start():
@@ -26,6 +35,11 @@ def start():
             remote(" ".join(command))
             puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1")
 
+
+@task
+def asdf():
+    for key in env:
+        print "%s\t%s" % (key, env[key])
 
 @task
 def stop():

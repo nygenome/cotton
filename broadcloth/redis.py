@@ -5,6 +5,16 @@ from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
 from broadcloth.helpers import signal
 from broadcloth.helpers import remote
+from broadcloth import set_env, register_setup
+
+def setup(**overrides):
+    set_env("redis_pidfile", os.path.join(env.shared_path, "pids", "redis.pid"), **overrides)
+    set_env("redis_port", 6379, **overrides)
+    set_env("redis_logfile", os.path.join(env.shared_path, "logs", "redis.log"), **overrides)
+    set_env("redis_dbdir", os.path.join(env.servers_path, "redis", "db"), **overrides)
+    set_env("redis_conf_template", os.path.join("config", "servers", "redis.template.conf"), **overrides)
+    set_env("redis_conf", os.path.join(env.servers_path, "redis", "conf", "redis.conf"), **overrides)
+register_setup(setup)
 
 
 @task

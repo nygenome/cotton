@@ -31,6 +31,27 @@ import os
 from fabric.api import *
 from fabric.contrib.files import exists
 from broadcloth.helpers import remote
+from broadcloth import set_env, register_setup
+
+def setup(**overrides):
+    set_env("virtualenv_path", os.path.join(env.app_root, ".virtualenv"), **overrides)
+    set_env("activate_virtualenv", "source %s" % os.path.join(env.virtualenv_path,
+                                                                 "bin", "activate"), **overrides)
+    set_env("releases_dir", "releases", **overrides)
+    set_env("current_dir", "current", **overrides)
+    set_env("shared_dir", "shared", **overrides)
+    set_env("shared_children", ["logs", "pids", "sock", "input"], **overrides)
+
+    set_env("releases_path", os.path.join(env.deploy_to, env.releases_dir), **overrides)
+    set_env("release_time_format", "%Y%m%d%H%M%S", **overrides)
+    set_env("release_name", time.strftime(env.release_time_format), **overrides)
+    set_env("release_path", os.path.join(env.releases_path, env.release_name), **overrides)
+
+    set_env("shared_path", os.path.join(env.deploy_to, env.shared_dir), **overrides)
+    set_env("current_path", os.path.join(env.deploy_to, env.current_dir), **overrides)
+
+    set_env("servers_path", os.path.join(env.app_root, "servers"), **overrides)
+register_setup(setup)
 
 @task 
 def whereami():

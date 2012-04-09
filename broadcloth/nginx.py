@@ -5,6 +5,16 @@ from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
 from broadcloth.helpers import signal
 from broadcloth.helpers import remote
+from broadcloth import set_env, register_setup
+
+def setup(**overrides):
+    set_env("nginx_pidfile", os.path.join(env.shared_path, "pids", "nginx.pid"), **overrides)
+    set_env("nginx_error_log", os.path.join(env.shared_path, "logs", "nginx.error.log"), **overrides)
+    set_env("nginx_access_log", os.path.join(env.shared_path, "logs", "nginx.access.log"), **overrides)
+    set_env("nginx_conf_template", os.path.join("config", "servers", "nginx.template.conf"), **overrides)
+    set_env("nginx_conf", os.path.join(env.servers_path, "nginx", "conf", "nginx.conf"), **overrides)
+    set_env("maintenance_file", os.path.join(env.current_path, "maintenance"), **overrides)
+register_setup(setup)
 
 @task
 def start():

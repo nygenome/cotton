@@ -4,6 +4,20 @@ from fabric.api import task, env, prefix
 from fabric.contrib.files import upload_template
 from broadcloth.helpers import remote
 from broadcloth.helpers import makedirs
+from broadcloth import set_env, register_setup
+
+def setup(**overrides):
+    set_env("sentry_root", os.path.join(env.servers_path, "sentry"), **overrides)
+    set_env("sentry_virtualenv_path", os.path.join(env.sentry_root, ".virtualenv"), **overrides)
+    set_env("sentry_activate_virtualenv", "source %s" % os.path.join(
+        env.sentry_virtualenv_path, "bin", "activate"), **overrides)
+    set_env("sentry_conf_template", os.path.join("config", "servers",
+                                                 "sentry_conf.template.py"), **overrides)
+    set_env("sentry_conf", os.path.join(env.sentry_root, "sentry_conf.py"), **overrides)
+    set_env("sentry_host", 'olive-prod', **overrides)
+    set_env("sentry_port", 9000, **overrides)
+
+register_setup(setup)
 
 @task
 def start():

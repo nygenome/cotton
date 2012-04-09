@@ -6,6 +6,15 @@ from fabric.contrib.files import upload_template
 from broadcloth.helpers import signal
 from broadcloth.helpers import remote
 
+from broadcloth import set_env, register_setup
+
+def setup(**overrides):
+    set_env("monit_root", os.path.join(env.servers_path, 'monit'), **overrides)
+    set_env("monit_conf_template", os.path.join("config", "servers",
+                                                 "monitrc.template"), **overrides)
+    set_env("monit_conf", os.path.join(env.servers_path, 'monit', 'etc', 'monitrc'), **overrides)
+register_setup(setup)
+
 default_location = "http://mmonit.com/monit/dist/monit-5.3.2.tar.gz"
 
 @task
