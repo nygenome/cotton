@@ -201,7 +201,6 @@ def checkout_source():
     # TODO: cached copy strategy
     # TODO: submodules
     with prefix("umask 0002"):
-        puts("*** find error is git quirk when running from a remote pty, ignore..")
         run("git clone %(scm_repository)s %(release_path)s" % env)
         git_dir = os.path.join(env.release_path, ".git")
         with cd(env.release_path):
