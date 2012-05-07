@@ -16,4 +16,4 @@ def old_releases(days=60):
 
     for line in result.split("\n"):
         if line < cutoff:
-            print "rm -rf %s" % os.path.join(env.releases_path, line)
+            print "%s" % os.path.join(env.releases_path, line)
