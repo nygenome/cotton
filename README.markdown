@@ -1,5 +1,5 @@
-Broadcloth
+Cotton
 ==========
 
-Only the best fabrics.
+Washable, durable fabrics.
 

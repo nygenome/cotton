@@ -4,7 +4,7 @@ import time
 from fabric import api as fab
 from fabric.api import env
 
-from broadcloth import helpers
+from cotton import helpers
 
 
 @fab.task 

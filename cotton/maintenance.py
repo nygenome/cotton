@@ -1,7 +1,7 @@
 from fabric import api as fab
 from fabric.api import env
 
-from broadcloth.deploy import authenticate
+from cotton.deploy import authenticate
 
 @fab.task
 def enable():

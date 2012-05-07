@@ -5,8 +5,8 @@ from fabric.api import env
 
 from fabric.contrib.files import upload_template
 
-from broadcloth import helpers
-from broadcloth import set_env, register_setup
+from cotton import helpers
+from cotton import set_env, register_setup
 
 def setup(**overrides):
     set_env("sentry_root", os.path.join(env.servers_path, "sentry"), **overrides)
@@ -48,7 +48,7 @@ def upgrade_sentry():
 @fab.task
 def install():
     '''Installs sentry, if it's not installed in the requested environment'''
-    from broadcloth import deploy
+    from cotton import deploy
     helpers.makedirs(env.sentry_root)
     deploy.setup_virtualenv(env.sentry_virtualenv_path)
 

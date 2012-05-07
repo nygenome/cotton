@@ -1,9 +1,9 @@
 from distutils.core import setup
 
 setup(
-    name='broadcloth',
+    name='cotton',
     version='0.1dev',
-    packages=['broadcloth',],
+    packages=['cotton',],
     license='BSD',
     long_description=open('README.markdown').read(),
 )

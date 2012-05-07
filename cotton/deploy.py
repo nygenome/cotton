@@ -35,8 +35,8 @@ from fabric.api import env
 from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
 
-from broadcloth import helpers
-from broadcloth import set_env, register_setup
+from cotton import helpers
+from cotton import set_env, register_setup
 
 def setup(**overrides):
     set_env("virtualenv_path", os.path.join(env.app_root, ".virtualenv"), **overrides)
