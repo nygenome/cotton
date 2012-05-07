@@ -47,6 +47,7 @@ def setup(**overrides):
     set_env("shared_dir", "shared", **overrides)
     set_env("shared_children", ["logs", "pids", "sock", "input"], **overrides)
 
+
     set_env("releases_path", os.path.join(env.deploy_to, env.releases_dir), **overrides)
     set_env("release_time_format", "%Y%m%d%H%M%S", **overrides)
     set_env("release_name", time.strftime(env.release_time_format), **overrides)
@@ -54,6 +55,10 @@ def setup(**overrides):
 
     set_env("shared_path", os.path.join(env.deploy_to, env.shared_dir), **overrides)
     set_env("current_path", os.path.join(env.deploy_to, env.current_dir), **overrides)
+
+    set_env("config_path", os.path.join(env.releases_path, "config"), **overrides)
+    set_env("config_environments_path", os.path.join(env.config_path,
+                                                     "environments"), **overrides)
 
     set_env("servers_path", os.path.join(env.app_root, "servers"), **overrides)
 register_setup(setup)
@@ -172,8 +177,7 @@ def make_workspace_file():
 def install_config(release_path):
     config_dir = os.path.join(release_path, "config")
     paths = {
-        "deploy": os.path.join(config_dir, 
-                               "environments",
+        "deploy": os.path.join(env.config_environments_path,
                                "%s.py" % env.configuration_name),
         "local": os.path.join(config_dir, "local.py")
     }
