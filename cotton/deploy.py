@@ -104,10 +104,10 @@ def setup_virtualenv(virtualenv_path):
 
 def make_directories():
     with fab.prefix("umask 0002"):
-        helpers.remote("mkdir %(deploy_to)s" % env)
+        helpers.remote("mkdir -p %(deploy_to)s" % env)
         with fab.cd(env.deploy_to):
-            helpers.remote("mkdir %(releases_dir)s" % env)
-            helpers.remote("mkdir %(shared_dir)s" % env)
+            helpers.remote("mkdir -p %(releases_dir)s" % env)
+            helpers.remote("mkdir -p %(shared_dir)s" % env)
             make_shared_children_dirs()
 
 def make_shared_children_dirs():
@@ -136,7 +136,7 @@ def install_requirements(release_path, upgrade=False):
     command.append("install")
     if upgrade:
         command.append("--upgrade")
-    command.append("-r config/requirements.pip")
+    command.append("-r %s" % env.requirements_file)
 
     with fab.prefix("umask 0002"):
         with fab.prefix(env.activate_virtualenv):
