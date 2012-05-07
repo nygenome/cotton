@@ -1,11 +1,12 @@
 import os
 
-from fabric.api import env, task, run, cd, prefix
+from fabric import api as fab
+from fabric.api import env
+
 from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
-from broadcloth.helpers import signal
-from broadcloth.helpers import remote
 
+from broadcloth import helpers
 from broadcloth import set_env, register_setup
 
 def setup(**overrides):
@@ -17,7 +18,7 @@ register_setup(setup)
 
 default_location = "http://mmonit.com/monit/dist/monit-5.3.2.tar.gz"
 
-@task
+@fab.task
 def install(source=None):
     # TODO: support source being a local file- test for file exists,
     # then assume url
@@ -28,61 +29,59 @@ def install(source=None):
     src_dir = os.path.join(env.servers_path, 'src')
     install_to = env.monit_root
     
-    with prefix("umask 0002"):
-        run("mkdir -p %s" % src_dir)
-        run("mkdir -p %s" % install_to)
+    with fab.prefix("umask 0002"):
+        fab.run("mkdir -p %s" % src_dir)
+        fab.run("mkdir -p %s" % install_to)
 
         archive = os.path.basename(source)
 
-        with cd(src_dir):
-            run("curl -O %s" % source)
-            run("tar -xzf %s" % archive)
+        with fab.cd(src_dir):
+            fab.run("curl -O %s" % source)
+            fab.run("tar -xzf %s" % archive)
             
         src_dir = os.path.join(src_dir, archive[:-len('.tar.gz')])
-        with cd(src_dir):
-            run("./configure --prefix=%s" % install_to)
-            run("make")
-            run("make install")
+        with fab.cd(src_dir):
+            fab.run("./configure --prefix=%s" % install_to)
+            fab.run("make")
+            fab.run("make install")
 
-        with cd(os.path.join(env.servers_path, 'bin')):
-            run("ln -s %s" % os.path.join(env.monit_root, 'bin', 'monit'))
+        with fab.cd(os.path.join(env.servers_path, 'bin')):
+            fab.run("ln -s %s" % os.path.join(env.monit_root, 'bin', 'monit'))
 
-
-@task
+@fab.task
 def start():
     monit()
 
-@task
+@fab.task
 def stop():
     monit("quit")
 
-@task
+@fab.task
 def status():
     monit("status")
 
 
 def monit(command=None):
-    with prefix("umask 0002"):
+    with fab.prefix("umask 0002"):
         c = [os.path.join(env.monit_root, 'bin', 'monit')]
         if command:
             c.append(command)
-        remote(' '.join(c))
+        helpers.remote(' '.join(c))
 
-
-@task
+@fab.task
 def update_conf():
-    with prefix("umask 0002"):
-        run("mkdir -p %s" % os.path.dirname(env.monit_conf))
-        remote("mv %(monit_conf)s{,.bak}" % env)
+    with fab.prefix("umask 0002"):
+        helpers.makedirs(os.path.dirname(env.monit_conf))
+        helpers.remote("mv %(monit_conf)s{,.bak}" % env)
         upload_template(env.monit_conf_template,
                         env.monit_conf,
                         context=env,
                         backup=False,
                         mode=0664)
-        remote("mv %(monit_conf)s %(monit_conf)s.tmp" % env)
-        remote("cp %(monit_conf)s.tmp %(monit_conf)s" % env)
-        remote("rm %(monit_conf)s.tmp" % env)
-        remote("chmod 700 %(monit_conf)s" % env)
+        helpers.remote("mv %(monit_conf)s %(monit_conf)s.tmp" % env)
+        helpers.remote("cp %(monit_conf)s.tmp %(monit_conf)s" % env)
+        helpers.remote("rm %(monit_conf)s.tmp" % env)
+        helpers.remote("chmod 700 %(monit_conf)s" % env)
 
 
 

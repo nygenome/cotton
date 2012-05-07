@@ -1,9 +1,6 @@
-import os
-import time
+from fabric import api as fab
 
-from fabric.api import task, local
-
-@task
+@fab.task
 def clean():
     '''Remove .pyc files in local workspace'''
-    local('find . -name \*.pyc | xargs rm')
+    fab.local('find . -name \*.pyc | xargs rm')

@@ -1,11 +1,12 @@
 import os
 
-from fabric.api import *
+from fabric import api as fab
+from fabric.api import env
+
 from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
-from broadcloth.helpers import signal
-from broadcloth.helpers import remote
 
+from broadcloth import helpers
 from broadcloth import set_env, register_setup
 
 def setup(**overrides):
@@ -16,11 +17,11 @@ def setup(**overrides):
     set_env("uwsgi_conf", os.path.join(env.servers_path, "uwsgi", "conf", "uwsgi.yml"), **overrides)
 register_setup(setup)
 
-@task
+@fab.task
 def start():
     '''Start the uwsgi instance.'''
-    if exists(env.uwsgi_pidfile):
-        abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
+    if running():
+        fab.abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
 
     # TODO: ARRRRRG you can't source files in sudo
     # As long as we're using 1.1 built with our custom-build pcre
@@ -30,47 +31,49 @@ def start():
         os.path.join(env.servers_path, "bin", "uwsgi"),
         "--yaml %(uwsgi_conf)s" % env
     ]
-    with cd(env.current_path):
-        with prefix("umask 0002"):
-            remote(" ".join(command))
-            puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1")
+    with fab.cd(env.current_path):
+        with fab.prefix("umask 0002"):
+            fab.remote(" ".join(command))
+            fab.puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1")
 
 
-@task
-def asdf():
-    for key in env:
-        print "%s\t%s" % (key, env[key])
-
-@task
+@fab.task
 def stop():
     '''Stops the uwsgi instance, if the pidfile is present'''
-    signal("INT", env.uwsgi_pidfile)
+    helpers.signal("INT", env.uwsgi_pidfile)
 
 
-@task
+@fab.task
 def restart():
     '''Hard restart of the master uwsgi process'''
-    signal("TERM", env.uwsgi_pidfile)
+    helpers.signal("TERM", env.uwsgi_pidfile)
 
-@task
+@fab.task
 def reload():
     '''Gracefully reload the master uwsgi process and workers'''
-    signal("HUP", env.uwsgi_pidfile)
+    helpers.signal("HUP", env.uwsgi_pidfile)
 
-@task
+@fab.task
 def statistics():
     '''Dump some statistics to the log file'''
-    signal("USR1", env.uwsgi_pidfile)
+    helpers.signal("USR1", env.uwsgi_pidfile)
 
 # TODO: log rotation
 
-@task
+@fab.task
 def update_conf():
     '''Updates the uwsgi conf file on the server, using the template.  Leaves
     a backup file in the uwsgi conf directory with a .bak extension.  Use this
     to roll back if necessary'''
-    with prefix("umask 0002"):
+    with fab.prefix("umask 0002"):
         upload_template(env.uwsgi_conf_template,
                         env.uwsgi_conf,
                         context=env,
                         mode=0664)
+
+def running():
+    if exists(env.uwsgi_pidfile):
+        return True
+    else:
+        return False
+

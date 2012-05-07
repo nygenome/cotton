@@ -1,9 +1,11 @@
 import os
 
-from fabric.api import task, env, prefix
+from fabric import api as fab
+from fabric.api import env
+
 from fabric.contrib.files import upload_template
-from broadcloth.helpers import remote
-from broadcloth.helpers import makedirs
+
+from broadcloth import helpers
 from broadcloth import set_env, register_setup
 
 def setup(**overrides):
@@ -14,41 +16,40 @@ def setup(**overrides):
     set_env("sentry_conf_template", os.path.join("config", "servers",
                                                  "sentry_conf.template.py"), **overrides)
     set_env("sentry_conf", os.path.join(env.sentry_root, "sentry_conf.py"), **overrides)
-    set_env("sentry_host", 'olive-prod', **overrides)
+    set_env("sentry_host", 'olive-staging', **overrides)
     set_env("sentry_port", 9000, **overrides)
-
 register_setup(setup)
 
-@task
+@fab.task
 def start():
     sentry("start --daemon")
 
-@task
+@fab.task
 def stop():
     sentry("stop")
 
-@task
+@fab.task
 def restart():
     sentry("restart")
 
-@task 
+@fab.task 
 def update_schema():
     sentry("upgrade")
 
-@task
+@fab.task
 def upgrade_sentry():
     '''Upgrade sentry to the latest version.  Sentry must be stopped first.'''
     # stop sentry.  if it stopped, then start again post upgrade
-    with prefix("umask 0002"):
-        with prefix(env.sentry_activate_virtualenv):
-            remote("pip install --upgrade sentry")
+    with fab.prefix("umask 0002"):
+        with fab.prefix(env.sentry_activate_virtualenv):
+            helpers.remote("pip install --upgrade sentry")
 
 
-@task
+@fab.task
 def install():
     '''Installs sentry, if it's not installed in the requested environment'''
     from broadcloth import deploy
-    makedirs(env.sentry_root)
+    helpers.makedirs(env.sentry_root)
     deploy.setup_virtualenv(env.sentry_virtualenv_path)
 
     upgrade_sentry()
@@ -56,14 +57,16 @@ def install():
     update_schema()
 
 def sentry(command):
-    with prefix("umask 0002"):
-        with prefix(env.sentry_activate_virtualenv):
-            remote("sentry %s --config=%s" % (command, env.sentry_conf))
+    with fab.prefix("umask 0002"):
+        with fab.prefix(env.sentry_activate_virtualenv):
+            helpers.remote("sentry %s --config=%s" % (command, env.sentry_conf))
 
-@task
+@fab.task
 def update_conf():
-    with prefix("umask 0002"):
+    with fab.prefix("umask 0002"):
         upload_template(env.sentry_conf_template,
                         env.sentry_conf,
                         context=env,
                         mode=0664)
+
+

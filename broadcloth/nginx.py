@@ -1,10 +1,12 @@
 import os
 
-from fabric.api import *
+from fabric import api as fab
+from fabric.api import env
+
 from fabric.contrib.files import exists
 from fabric.contrib.files import upload_template
-from broadcloth.helpers import signal
-from broadcloth.helpers import remote
+
+from broadcloth import helpers
 from broadcloth import set_env, register_setup
 
 def setup(**overrides):
@@ -16,35 +18,42 @@ def setup(**overrides):
     set_env("maintenance_file", os.path.join(env.current_path, "maintenance"), **overrides)
 register_setup(setup)
 
-@task
+@fab.task
 def start():
     '''Start the nginx instance.'''
-    if exists(env.nginx_pidfile):
-        abort("nginx pidfile already exists: %(host)s:%(nginx_pidfile)s" % env)
+    if running():
+        fab.abort("nginx pidfile already exists: %(host)s:%(nginx_pidfile)s" % env)
 
     command = [
         os.path.join(env.servers_path, "bin", "nginx"),
         "-c %(nginx_conf)s" % env,
     ]
-    with cd(env.current_path):
-        remote(" ".join(command))
+    with fab.cd(env.current_path):
+        helpers.remote(" ".join(command))
 
-@task
+@fab.task
 def stop(kill=False):
     sig = "QUIT"
     if kill:
         sig = "KILL"
 
-    signal(sig, env.nginx_pidfile)
+    helpers.signal(sig, env.nginx_pidfile)
 
-@task
+@fab.task
 def reload():
-    signal("HUP", env.nginx_pidfile)
+    helpers.signal("HUP", env.nginx_pidfile)
 
-@task
+@fab.task
 def update_conf():
-    with prefix("umask 0002"):
+    with fab.prefix("umask 0002"):
         upload_template(env.nginx_conf_template,
                         env.nginx_conf,
                         context=env,
                         mode=0664)
+
+def running():
+    if exists(env.nginx_pidfile):
+        return True
+    else:
+        return False
+

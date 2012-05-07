@@ -1,19 +1,20 @@
+from fabric import api as fab
+from fabric.api import env
+
 from broadcloth.deploy import authenticate
 
-from fabric.api import env, task, run, prefix
-
-@task
+@fab.task
 def enable():
     '''Return a maintenance page (and 503 status) in response to all
     requests
     '''
     authenticate()
-    with prefix("umask 0002"):
-        run("touch %(maintenance_file)s" % env)
+    with fab.prefix("umask 0002"):
+        fab.run("touch %(maintenance_file)s" % env)
 
-@task
+@fab.task
 def disable():
     '''Remove maintenance page and respond to requests normally'''
     authenticate()
-    run("rm -f %(maintenance_file)s" % env)
+    fab.run("rm -f %(maintenance_file)s" % env)
     

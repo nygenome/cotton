@@ -1,24 +1,26 @@
 import re
 
-from fabric.api import *
-from broadcloth.helpers import remote
+from fabric import api as fab
+from fabric.api import env
 
-@task
+from broadcloth import helpers
+
+@fab.task
 def freeze():
     pip("freeze")
 
-@task
+@fab.task
 def install(package):
     pip("install %s" % package)
 
-@task
+@fab.task
 def uninstall(package):
     pip("uninstall %s" % package)
 
 def pip(command):
-    with prefix("umask 0002"):
-        with prefix(env.activate_virtualenv):
-            remote("pip %s" % command)
+    with fab.prefix("umask 0002"):
+        with fab.prefix(env.activate_virtualenv):
+            helpers.remote("pip %s" % command)
 
 def sanitize(command):
     '''Shell injection protection'''
