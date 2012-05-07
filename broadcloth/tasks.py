@@ -3,6 +3,13 @@ import time
 
 from fabric.api import task, env, prefix, cd, run, settings, hide
 
+
+@task 
+def whereami():
+    '''Displays some information about where this task is running.'''
+    with cd(env.current_path):
+        run("uname -n; pwd -P; ls")
+
 @task
 def old_releases(days=60):
     interval = days * 24 * 60 * 60

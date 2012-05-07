@@ -54,12 +54,6 @@ def setup(**overrides):
     set_env("servers_path", os.path.join(env.app_root, "servers"), **overrides)
 register_setup(setup)
 
-@task 
-def whereami():
-    '''Displays some information about where this task is running.'''
-    with cd(env.current_path):
-        run("uname -n; pwd -P; ls")
-
 @task(default=True)
 def update(run_tests=True):
     '''Deploy a new version from origin/master. Pass :run_tests=0 to
