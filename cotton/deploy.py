@@ -172,7 +172,9 @@ def make_workspace_file():
 def install_config(release_path):
     config_dir = os.path.join(release_path, "config")
     paths = {
-        "deploy": os.path.join(config_dir, "%s.py" % env.configuration_name),
+        "deploy": os.path.join(config_dir, 
+                               "environments",
+                               "%s.py" % env.configuration_name),
         "local": os.path.join(config_dir, "local.py")
     }
     with fab.settings(fab.hide('warnings'), warn_only=True):
