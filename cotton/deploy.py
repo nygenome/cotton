@@ -56,7 +56,7 @@ def setup(**overrides):
     set_env("shared_path", os.path.join(env.deploy_to, env.shared_dir), **overrides)
     set_env("current_path", os.path.join(env.deploy_to, env.current_dir), **overrides)
 
-    set_env("config_path", os.path.join(env.releases_path, "config"), **overrides)
+    set_env("config_path", os.path.join(env.release_path, "config"), **overrides)
     set_env("config_environments_path", os.path.join(env.config_path,
                                                      "environments"), **overrides)
 
