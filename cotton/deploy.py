@@ -184,7 +184,7 @@ def install_config(release_path):
     with fab.settings(fab.hide('warnings'), warn_only=True):
         helpers.remote("test -L %(local)s && rm %(local)s" % paths)
 
-    helpers.remote("ln -s %(deploy)s %(local)s" % paths)
+    helpers.remote("test -e %(deploy)s && ln -s %(deploy)s %(local)s" % paths)
 
 # TODO: move authenticate to helpers
 def authenticate():
