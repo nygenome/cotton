@@ -33,7 +33,7 @@ def start():
     ]
     with fab.cd(env.current_path):
         with fab.prefix("umask 0002"):
-            fab.remote(" ".join(command))
+            helpers.remote(" ".join(command))
             fab.puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1")
 
 
