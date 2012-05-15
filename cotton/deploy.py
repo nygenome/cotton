@@ -129,13 +129,12 @@ def checkout_source():
         fab.run("rm -rf %s" % git_dir)
 
 
-def install_requirements(release_path, upgrade=False):
+def install_requirements(release_path, *command_line_flags):
     '''Install requirements into pip from config/requirements.pip'''
     command = []
     command.append("pip")
     command.append("install")
-    if upgrade:
-        command.append("--upgrade")
+    command.extend(command_line_flags)
     command.append("-r %s" % env.requirements_file)
 
     with fab.prefix("umask 0002"):
