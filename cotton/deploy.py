@@ -173,17 +173,19 @@ def make_workspace_file():
                                                    env.release_name)
     helpers.remote("echo \"%s\" > %s" % (ws_string, ws_file))
     
-def install_config(release_path):
+def install_config(release_path, command="ln -s"):
     config_dir = os.path.join(release_path, "config")
     paths = {
+        "cmd": command,
         "deploy": os.path.join(env.config_environments_path,
                                "%s.py" % env.configuration_name),
+        # TODO: exctract this out to be configurable?
         "local": os.path.join(config_dir, "local.py")
     }
     with fab.settings(fab.hide('warnings'), warn_only=True):
         helpers.remote("test -L %(local)s && rm %(local)s" % paths)
 
-    helpers.remote("test -e %(deploy)s && ln -s %(deploy)s %(local)s" % paths)
+    helpers.remote("test -e %(deploy)s && %(cmd)s %(deploy)s %(local)s" % paths)
 
 # TODO: move authenticate to helpers
 def authenticate():
