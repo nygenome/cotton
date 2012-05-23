@@ -129,20 +129,6 @@ def checkout_source():
         fab.run("rm -rf %s" % git_dir)
 
 
-def install_requirements(release_path, *command_line_flags):
-    '''Install requirements into pip from config/requirements.pip'''
-    command = []
-    command.append("pip")
-    command.append("install")
-    command.extend(command_line_flags)
-    command.append("-r %s" % env.requirements_file)
-
-    with fab.prefix("umask 0002"):
-        with fab.prefix(env.activate_virtualenv):
-            with fab.cd(release_path):
-                helpers.remote(" ".join(command))
-
-
 def make_symlinks(release_path):
     '''Create a 'current' symlink pointing to a release we just checked 
     out, and symlinks within pointing to the shared children'''
