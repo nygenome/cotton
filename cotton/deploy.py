@@ -147,6 +147,19 @@ def make_symlinks(release_path):
         ))
         
 
+def install_workspace():
+    fab.local(choose_local_tar() + (" -czf %(release_name)s.tar *" % env))
+    with fab.prefix("umask 0002"):
+        fab.run("mkdir -p %(release_path)s" % env)
+        fab.put("%(release_name)s.tar" % env, env.release_path)
+        with fab.cd(env.release_path):
+            helpers.remote("tar -zxf %(release_name)s.tar" % env)
+            helpers.remote("rm %(release_name)s.tar" % env)
+
+    fab.local("rm %(release_name)s.tar" % env)
+    helpers.remote("rm -f %(release_path)s/config/local.py" % env)
+
+
 def make_workspace_file():
     """Create a tag file that announces that a particular release is
     was made from a working copy, rather than from version control."""
