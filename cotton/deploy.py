@@ -116,16 +116,21 @@ def make_shared_children_dirs():
             helpers.remote("test -d %s || mkdir %s" % (child, child))
 
 
-def checkout_source():
+def checkout_source(branch=None):
     # TODO: move this to git.py
     # TODO: cached copy strategy
     # TODO: submodules
     with fab.prefix("umask 0002"):
         fab.run("git clone %(scm_repository)s %(release_path)s" % env)
+
         git_dir = os.path.join(env.release_path, ".git")
         with fab.cd(env.release_path):
-            fab.run("git rev-parse HEAD > %s" % os.path.join(env.release_path,
-                                                         "REVISION"))
+            if branch:
+                fab.run("git checkout -b deploy origin/%s" % branch)
+
+            revision_path = os.path.join(env.release_path, "REVISION")
+            fab.run('git status | grep "On branch" > %s' % revision_path)
+            fab.run("git rev-parse HEAD >> %s" % revision_path)
         fab.run("rm -rf %s" % git_dir)
 
 
