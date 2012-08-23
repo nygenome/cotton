@@ -38,6 +38,8 @@ from fabric.contrib.files import upload_template
 from cotton import helpers
 from cotton import set_env, register_setup
 
+from cotton.scm import BroadGit
+
 def setup(**overrides):
     set_env("virtualenv_path", os.path.join(env.app_root, ".virtualenv"), **overrides)
     set_env("activate_virtualenv", "source %s" % os.path.join(env.virtualenv_path,
@@ -117,21 +119,18 @@ def make_shared_children_dirs():
 
 
 def checkout_source(branch=None):
-    # TODO: move this to git.py
     # TODO: cached copy strategy
     # TODO: submodules
+    scm = BroadGit()
     with fab.prefix("umask 0002"):
-        fab.run("git clone %(scm_repository)s %(release_path)s" % env)
+        scm.checkout(env.scm_repository, env.release_path, branch)
+        # bug in early 1.7 git versions, fixed 2012-07-15 - git update needed
+        fab.run("chmod g+w %(release_path)s" % env)
 
-        git_dir = os.path.join(env.release_path, ".git")
-        with fab.cd(env.release_path):
-            if branch:
-                fab.run("git checkout -b deploy origin/%s" % branch)
-
-            revision_path = os.path.join(env.release_path, "REVISION")
-            fab.run('git status | grep "On branch" > %s' % revision_path)
-            fab.run("git rev-parse HEAD >> %s" % revision_path)
-        fab.run("rm -rf %s" % git_dir)
+        revision_path = os.path.join(env.release_path, "REVISION")
+        scm.branch_name(env.release_path, revision_path)
+        scm.revision(env.release_path, revision_path, append=True)
+        fab.run("rm -rf %s" % os.path.join(env.release_path, ".git"))
 
 
 def make_symlinks(release_path):
