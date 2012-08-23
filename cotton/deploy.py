@@ -121,7 +121,7 @@ def make_shared_children_dirs():
 def checkout_source(branch=None):
     # TODO: cached copy strategy
     # TODO: submodules
-    scm = BroadGit()
+    scm = env.scm_tool
     with fab.prefix("umask 0002"):
         scm.checkout(env.scm_repository, env.release_path, branch)
         # bug in early 1.7 git versions, fixed 2012-07-15 - git update needed
