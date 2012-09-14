@@ -6,4 +6,7 @@ setup(
     packages=['cotton',],
     license='BSD',
     long_description=open('README.markdown').read(),
+    install_requires=[
+        "fabric",
+    ],
 )
