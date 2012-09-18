@@ -14,7 +14,7 @@ def setup(**overrides):
     set_env("uwsgi_logfile", os.path.join(env.shared_path, "logs", "uwsgi.log"), **overrides)
     set_env("uwsgi_socket", os.path.join(env.shared_path, "sock", "uwsgi.sock"), **overrides)
     set_env("uwsgi_conf_template", os.path.join("config", "servers", "uwsgi.template.yml"), **overrides)
-    set_env("uwsgi_conf", os.path.join(env.servers_path, "uwsgi", "conf", "uwsgi.yml"), **overrides)
+    set_env("uwsgi_conf_path", os.path.join(env.servers_path, "uwsgi", "conf"), **overrides)
 register_setup(setup)
 
 @fab.task
@@ -29,7 +29,7 @@ def start():
     command = [
         "LD_LIBRARY_PATH=/seq/a2e0/tools/util/pcre/pcre-8.30/lib",
         os.path.join(env.servers_path, "bin", "uwsgi"),
-        "--yaml %(uwsgi_conf)s" % env
+        "--yaml %s" % os.path.join(env.uwsgi_conf_path, "uwsgi.yml")
     ]
     with fab.cd(env.current_path):
         with fab.prefix("umask 0002"):
@@ -66,8 +66,9 @@ def update_conf():
     a backup file in the uwsgi conf directory with a .bak extension.  Use this
     to roll back if necessary'''
     with fab.prefix("umask 0002"):
+        helpers.remote("mkdir -p %s" % env.uwsgi_conf_path)
         upload_template(env.uwsgi_conf_template,
-                        env.uwsgi_conf,
+                        os.path.join(env.uwsgi_conf_path, "uwsgi.yml"),
                         context=env,
                         mode=0664)
 
