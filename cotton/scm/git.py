@@ -9,27 +9,37 @@ class Git(SCM):
         commands = ' '.join(['git'] + list(commands))
         fab.run(commands)
 
-    def checkout(self, repository, checkout_to, branch=None):
+    def checkout(self, repository, checkout_to, ref=None):
+
         self.git('clone', repository, checkout_to)
-        if branch:
+        if ref:
             with fab.cd(checkout_to):
-                self.git('checkout -b deploy', "origin/%s" % branch)
+                self.git('checkout', ref)
 
 
+    def branch_name(self, repository, output_file=None, append=False):
+        return self._log_state(command=['status | grep "On branch"']
+                               repository=repository,
+                               output_file=output_file,
+                               append=append)
 
-    def branch_name(self, checkout_to, output_file=None, append=False):
-        command = ['status | grep "On branch"']
-        with fab.cd(checkout_to):
-            if output_file:
-                redirect = '>'
-                if append:
-                    redirect = '>>'
-                command.extend([redirect, output_file])
-            return self.git(*command)
+    def revision(self, repository, output_file=None, append=False):
+        return self._log_state(command=['rev-parse HEAD']
+                               repository=repository,
+                               output_file=output_file,
+                               append=append)
 
-    def revision(self, checkout_to, output_file=None, append=False):
-        command = ['rev-parse HEAD']
-        with fab.cd(checkout_to):
+
+    def tag_name(self, repository, output_file=None, append=False):
+        with fab.settings(fab.hide('warnings'), warn_only=True):
+            return self._log_state(command=['describe --tags 2>/dev/null'],
+                                   repository=repository,
+                                   output_file=output_file,
+                                   append=append)
+
+   
+    def _log_state(self, command, repository, output_file=None, append=False):
+        with fab.cd(repository):
             if output_file:
                 redirect = '>'
                 if append:

@@ -118,17 +118,18 @@ def make_shared_children_dirs():
             helpers.remote("test -d %s || mkdir %s" % (child, child))
 
 
-def checkout_source(branch=None):
+def checkout_source(ref=None):
     # TODO: cached copy strategy
     # TODO: submodules
     scm = env.scm_tool
     with fab.prefix("umask 0002"):
-        scm.checkout(env.scm_repository, env.release_path, branch)
+        scm.checkout(env.scm_repository, env.release_path, ref)
         # bug in early 1.7 git versions, fixed 2012-07-15 - git update needed
         fab.run("chmod g+w %(release_path)s" % env)
 
         revision_path = os.path.join(env.release_path, "REVISION")
         scm.branch_name(env.release_path, revision_path)
+        scm.tag_name(env.release_path, revision_path, append=True)
         scm.revision(env.release_path, revision_path, append=True)
         fab.run("rm -rf %s" % os.path.join(env.release_path, ".git"))
 
