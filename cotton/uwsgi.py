@@ -14,23 +14,31 @@ def setup(**overrides):
     set_env("uwsgi_logfile", os.path.join(env.shared_path, "logs", "uwsgi.log"), **overrides)
     set_env("uwsgi_socket", os.path.join(env.shared_path, "sock", "uwsgi.sock"), **overrides)
     set_env("uwsgi_conf_template", os.path.join("config", "servers", "uwsgi.template.yml"), **overrides)
-    set_env("uwsgi_conf", os.path.join(env.servers_path, "uwsgi", "conf", "uwsgi.yml"), **overrides)
+    set_env("uwsgi_conf_path", os.path.join(env.servers_path, "uwsgi", "conf"), **overrides)
 register_setup(setup)
 
+PCRE = "/broad/software/nonfree/Linux/redhat_5_x86_64/pkgs/oracle_full_client/111_client/lib"
+
 @fab.task
-def start():
+def start(command_prefix=None, linked_libraries=[]):
     '''Start the uwsgi instance.'''
+    # command_prefix : environmental commands like dotkit (local)
+    # linked_libraries : library prepending due to sudo-shell (remote)
+
     if running():
         fab.abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
 
     # TODO: ARRRRRG you can't source files in sudo
     # As long as we're using 1.1 built with our custom-build pcre
     # library, we need to tell uwsgi where to find this
+    linked_libraries.append(PCRE)
     command = [
-        "LD_LIBRARY_PATH=/seq/a2e0/tools/util/pcre/pcre-8.30/lib",
+        "LD_LIBRARY_PATH=%s" % ":".join(linked_libraries),
         os.path.join(env.servers_path, "bin", "uwsgi"),
-        "--yaml %(uwsgi_conf)s" % env
+        "--yaml %s" % os.path.join(env.uwsgi_conf_path, "uwsgi.yml")
     ]
+    if command_prefix:
+        command.insert(0, command_prefix + " && ")
     with fab.cd(env.current_path):
         with fab.prefix("umask 0002"):
             helpers.remote(" ".join(command))
@@ -66,8 +74,9 @@ def update_conf():
     a backup file in the uwsgi conf directory with a .bak extension.  Use this
     to roll back if necessary'''
     with fab.prefix("umask 0002"):
+        helpers.remote("mkdir -p %s" % env.uwsgi_conf_path)
         upload_template(env.uwsgi_conf_template,
-                        env.uwsgi_conf,
+                        os.path.join(env.uwsgi_conf_path, "uwsgi.yml"),
                         context=env,
                         mode=0664)
 
