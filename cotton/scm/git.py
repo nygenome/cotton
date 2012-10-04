@@ -18,13 +18,13 @@ class Git(SCM):
 
 
     def branch_name(self, repository, output_file=None, append=False):
-        return self._log_state(command=['status | grep "On branch"']
+        return self._log_state(command=['status | grep "On branch"'],
                                repository=repository,
                                output_file=output_file,
                                append=append)
 
     def revision(self, repository, output_file=None, append=False):
-        return self._log_state(command=['rev-parse HEAD']
+        return self._log_state(command=['rev-parse HEAD'],
                                repository=repository,
                                output_file=output_file,
                                append=append)
