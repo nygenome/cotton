@@ -14,7 +14,7 @@ def whereami():
         fab.run("uname -n; pwd -P; ls")
 
 @fab.task
-def old_releases(days=60):
+def old_releases(days=60, delete=False):
     interval = days * 24 * 60 * 60
 
     cutoff = time.strftime(env.release_time_format, 
@@ -26,4 +26,8 @@ def old_releases(days=60):
 
     for line in result.split("\n"):
         if line < cutoff:
-            print "%s" % os.path.join(env.releases_path, line)
+            path = os.path.join(env.releases_path, line) 
+            if delete:
+                fab.run("rm -rf %s" % path)
+            else:
+                print path
