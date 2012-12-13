@@ -31,3 +31,30 @@ def old_releases(days=60, delete=False):
                 fab.run("rm -rf %s" % path)
             else:
                 print path
+
+@fab.task
+def time_since(release_name=None):
+    pass
+
+@fab.task
+def log_since(release_name=None):
+    '''
+    Print a log of all commits between the current release and HEAD of your
+    local repository
+    '''
+    git_log = ["log", "--graph",
+               "--pretty=format:'%Cred%h%Creset",
+               "-%C(yellow)%d%Creset %s %Cgreen(%cr)",
+               "%C(bold blue)<%an>%Creset'",
+               "--abbrev-commit", "--date=relative"]
+
+    if release_name:
+        release_path = os.path.join(env.releases.path, release_name)
+    else:
+        release_path = env.current_path
+
+    with fab.cd(release_path):
+        revision = fab.run("cat REVISION | tail -n 1")
+
+    fab.local("git %s %s.." % (" ".join(git_log), revision))
+
