@@ -35,7 +35,9 @@ def start(command_prefix=None, linked_libraries=[]):
     command = [
         "LD_LIBRARY_PATH=%s" % ":".join(linked_libraries),
         os.path.join(env.servers_path, "bin", "uwsgi"),
-        "--yaml %s" % os.path.join(env.uwsgi_conf_path, "uwsgi.yml")
+        "--yaml %s" % os.path.join(env.uwsgi_conf_path, "uwsgi.yml"),
+        "--env LC_ALL=’en_US.UTF-8′",
+        "--env LANG=’en_US.UTF-8′"
     ]
     if command_prefix:
         command.insert(0, command_prefix + " && ")
