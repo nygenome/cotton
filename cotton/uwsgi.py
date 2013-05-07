@@ -17,7 +17,7 @@ def setup(**overrides):
     set_env("uwsgi_conf_path", os.path.join(env.servers_path, "uwsgi", "conf"), **overrides)
 register_setup(setup)
 
-PCRE = "/broad/software/nonfree/Linux/redhat_5_x86_64/pkgs/oracle_full_client/111_client/lib"
+PCRE = "/seq/a2e0/tools/util/pcre/pcre-8.30/lib"
 
 @fab.task
 def start(command_prefix=None, linked_libraries=[]):
@@ -29,7 +29,7 @@ def start(command_prefix=None, linked_libraries=[]):
         fab.abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
 
     # TODO: ARRRRRG you can't source files in sudo
-    # As long as we're using 1.1 built with our custom-build pcre
+    # As long as we're using (0.9,1.1,1.2) built with our custom-build pcre
     # library, we need to tell uwsgi where to find this
     linked_libraries.append(PCRE)
     command = [
@@ -42,7 +42,7 @@ def start(command_prefix=None, linked_libraries=[]):
     with fab.cd(env.current_path):
         with fab.prefix("umask 0002"):
             helpers.remote(" ".join(command))
-            fab.puts("*** ignore unlink() error - uwsgi quirk in 0.9.9.2 and 1.1")
+            fab.puts("*** speakeasy note: ignore unlink() error for pre 1.2 uwsgi.")
 
 
 @fab.task
