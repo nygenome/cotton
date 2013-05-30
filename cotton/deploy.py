@@ -23,7 +23,7 @@ Uses the following env settings:
         * shared_path
         * uwsgi_pidfile
         * virtualenv_path
-      
+
 
 '''
 import os
@@ -47,7 +47,7 @@ def setup(**overrides):
     set_env("releases_dir", "releases", **overrides)
     set_env("current_dir", "current", **overrides)
     set_env("shared_dir", "shared", **overrides)
-    set_env("shared_children", ["logs", "pids", "sock", "input"], **overrides)
+    set_env("shared_children", ["logs", "pids", "sock", "input", "static_root"], **overrides)
 
 
     set_env("releases_path", os.path.join(env.deploy_to, env.releases_dir), **overrides)
@@ -135,7 +135,7 @@ def checkout_source(ref=None):
 
 
 def make_symlinks(release_path):
-    '''Create a 'current' symlink pointing to a release we just checked 
+    '''Create a 'current' symlink pointing to a release we just checked
     out, and symlinks within pointing to the shared children'''
     with fab.settings(fab.hide('warnings'), warn_only=True):
         helpers.remote("test -L %(current_path)s && rm %(current_path)s" % env)
@@ -150,7 +150,7 @@ def make_symlinks(release_path):
             os.path.join(env.shared_path, child),
             child_path
         ))
-        
+
 
 def install_workspace():
     fab.local(choose_local_tar() + (" -czf %(release_name)s.tar *" % env))
