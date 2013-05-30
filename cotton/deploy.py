@@ -177,14 +177,23 @@ def make_workspace_file():
                                                    env.release_name)
     helpers.remote("echo \"%s\" > %s" % (ws_string, ws_file))
     
-def install_config(release_path, command="ln -s"):
-    config_dir = os.path.join(release_path, "config")
+def install_config(release_path, config_dir='config', config_extension='py',
+                   local_basename='local', command='ln -s'):
+    config_dir = os.path.join(release_path, config_dir)
+
+    if config_extension.startswith('.'):
+        config_extension = config_extension[1:]
+    
     paths = {
         "cmd": command,
-        "deploy": os.path.join(env.config_environments_path,
-                               "%s.py" % env.configuration_name),
-        # TODO: exctract this out to be configurable?
-        "local": os.path.join(config_dir, "local.py")
+        "deploy": os.path.join(
+            env.config_environments_path,
+            "%s.%s" % (env.configuration_name, config_extension)
+        ),
+        "local": os.path.join(
+            config_dir,
+            "%s.%s" % (local_basename, config_extension)
+        )
     }
     with fab.settings(fab.hide('warnings'), warn_only=True):
         helpers.remote("test -L %(local)s && rm %(local)s" % paths)
