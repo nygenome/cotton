@@ -25,7 +25,7 @@ class Subversion(SCM):
         pass
 
     def revision(self, repository, output_file=None, append=False):
-        return self._log_state(command=['svn info | grep "Revision:"'],
+        return self._log_state(command=['info | grep "Revision:"'],
                                repository=repository,
                                output_file=output_file,
                                append=append)
@@ -42,7 +42,7 @@ class Subversion(SCM):
                 if append:
                     redirect = '>>'
                 command.extend([redirect, output_file])
-            return self.git(*command)
+            return self.svn(*command)
 
 
 
