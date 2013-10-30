@@ -176,14 +176,14 @@ def make_workspace_file():
                                                    os.environ['PWD'],
                                                    env.release_name)
     helpers.remote("echo \"%s\" > %s" % (ws_string, ws_file))
-    
+
 def install_config(release_path, config_dir='config', config_extension='py',
                    local_basename='local', command='ln -s'):
     config_dir = os.path.join(release_path, config_dir)
 
     if config_extension.startswith('.'):
         config_extension = config_extension[1:]
-    
+
     paths = {
         "cmd": command,
         "deploy": os.path.join(
