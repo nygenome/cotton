@@ -31,21 +31,24 @@ class Git(SCM):
 
 
     def tag_name(self, repository, output_file=None, append=False):
-        with fab.settings(fab.hide('warnings'), warn_only=True):
-            return self._log_state(command=['describe --tags 2>/dev/null'],
-                                   repository=repository,
-                                   output_file=output_file,
-                                   append=append)
+        return self._log_state(command=['describe --tags'],
+                               repository=repository,
+                               output_file=output_file,
+                               append=append)
 
    
     def _log_state(self, command, repository, output_file=None, append=False):
-        with fab.cd(repository):
-            if output_file:
-                redirect = '>'
-                if append:
-                    redirect = '>>'
-                command.extend([redirect, output_file])
-            return self.git(*command)
+        with fab.settings(fab.hide('warnings'), warn_only=True):
+            stderr_redirect = ['2>', '/dev/null']
+            command.extend(stderr_redirect)
+
+            with fab.cd(repository):
+                if output_file:
+                    redirect = '>'
+                    if append:
+                        redirect = '>>'
+                    command.extend([redirect, output_file])
+                return self.git(*command)
 
 
 
