@@ -10,6 +10,9 @@ class SCM(object):
     def revision(self, checkout_to, output_file=None, append=False):
         raise NotImplementedError
 
+    def tag_name(self, checkout_to, output_file=None, append=False):
+        raise NotImplementedError
+
 
 
 
