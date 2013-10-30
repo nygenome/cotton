@@ -15,11 +15,10 @@ class Subversion(SCM):
         fab.run(commands)
 
     def checkout(self, repository, checkout_to, ref=None):
-
-        self.git('checkout', repository, checkout_to)
         if ref:
-            with fab.cd(checkout_to):
-                self.git('checkout', ref)
+            repository = "%s@%s" % (repository, ref)
+
+        self.svn('checkout', repository, checkout_to)
 
 
     def branch_name(self, repository, output_file=None, append=False):
