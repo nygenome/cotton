@@ -91,6 +91,14 @@ def find_canonical_current_release():
 
     return current
 
+def setup_activate_virtualenv():
+    with fab.settings(fab.hide('stdout')):
+        shell = fab.run("echo $SHELL")
+        if shell.endswith("csh") and \
+           not env.activate_virtualenv.endswith(".csh"):
+            env.activate_virtualenv += ".csh"
+
+
 def setup_virtualenv(virtualenv_path):
     virtualenv_cmd = ["virtualenv",
                       "--distribute",

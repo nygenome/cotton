@@ -4,6 +4,7 @@ from fabric import api as fab
 from fabric.api import env
 
 from cotton import helpers
+from cotton import deploy
 
 @fab.task
 def freeze():
@@ -18,6 +19,8 @@ def uninstall(package):
     pip("uninstall %s" % package)
 
 def pip(command):
+    deploy.setup_activate_virtualenv()
+
     with fab.prefix("umask 0002"):
         with fab.prefix(env.activate_virtualenv):
             helpers.remote("pip %s" % command)
@@ -50,7 +53,7 @@ def freeze_requirements(release_path):
     '''
     command = [
         'freeze',
-        "> %s" % env.requirements_file,    
+        "> %s" % env.requirements_file,
     ]
 
     with fab.cd(release_path):
