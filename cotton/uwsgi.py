@@ -42,7 +42,6 @@ def start(command_prefix=None, linked_libraries=[]):
     with fab.cd(env.current_path):
         with fab.prefix("umask 0002"):
             helpers.remote(" ".join(command))
-            fab.puts("*** speakeasy note: ignore unlink() error for pre 1.2 uwsgi.")
 
 
 @fab.task
