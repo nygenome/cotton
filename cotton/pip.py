@@ -50,7 +50,7 @@ def freeze_requirements(release_path):
     '''
     command = [
         'freeze',
-        "> %s" % env.requirements_file,    
+        "> %s" % env.requirements_file,
     ]
 
     with fab.cd(release_path):
