@@ -23,6 +23,7 @@ Uses the following env settings:
         * shared_path
         * uwsgi_pidfile
         * virtualenv_path
+        * virtualenv_python_dir
 
 
 '''
@@ -95,11 +96,10 @@ def setup_virtualenv(virtualenv_path):
     virtualenv_cmd = ["virtualenv",
                       "--distribute",
                       "--no-site-packages",
-                      "-p python2.7",
+                      "-p %s" % os.path.join(env.virtualenv_python_dir, 'python'),
                       "%s" % virtualenv_path]
 
-    # TODO: extract to variable
-    with fab.path("/seq/annotation/development/tools/python/2.7.1/bin", behavior='prepend'):
+    with fab.path(env.virtualenv_python_dir, behavior='prepend'):
         with fab.prefix("umask 0002"):
             helpers.remote(" ".join(virtualenv_cmd))
 
