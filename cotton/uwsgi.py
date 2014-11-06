@@ -17,10 +17,8 @@ def setup(**overrides):
     set_env("uwsgi_conf_path", os.path.join(env.servers_path, "uwsgi", "conf"), **overrides)
 register_setup(setup)
 
-PCRE = "/seq/a2e0/tools/util/pcre/pcre-8.30/lib"
-
 @fab.task
-def start(command_prefix=None, linked_libraries=[]):
+def start(command_prefix=None, linked_libraries=None):
     '''Start the uwsgi instance.'''
     # command_prefix : environmental commands like dotkit (local)
     # linked_libraries : library prepending due to sudo-shell (remote)
@@ -28,21 +26,19 @@ def start(command_prefix=None, linked_libraries=[]):
     if running():
         fab.abort("uwsgi pidfile already exists: %(uwsgi_pidfile)s" % env)
 
-    # TODO: ARRRRRG you can't source files in sudo
-    # As long as we're using (0.9,1.1,1.2) built with our custom-build pcre
-    # library, we need to tell uwsgi where to find this
-    linked_libraries.append(PCRE)
-    command = [
-        "LD_LIBRARY_PATH=%s" % ":".join(linked_libraries),
-        os.path.join(env.servers_path, "bin", "uwsgi"),
-        "--yaml %s" % os.path.join(env.uwsgi_conf_path, "uwsgi.yml")
-    ]
-    if command_prefix:
+    command = []
+    if linked_libraries is not None:
+        command = [ "LD_LIBRARY_PATH=%s" % ":".join(linked_libraries) ]
+    command.extend([
+        "uwsgi", "--yaml %s" % os.path.join(env.uwsgi_conf_path, "uwsgi.yml")
+    ])
+    if command_prefix is not None:
         command.insert(0, command_prefix + " && ")
+
     with fab.cd(env.current_path):
         with fab.prefix("umask 0002"):
-            helpers.remote(" ".join(command))
-
+            with fab.prefix(env.activate_virtualenv):
+                helpers.remote(" ".join(command))
 
 @fab.task
 def stop():
