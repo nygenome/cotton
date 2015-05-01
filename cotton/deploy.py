@@ -45,6 +45,8 @@ def setup(**overrides):
     set_env("virtualenv_path", os.path.join(env.app_root, ".virtualenv"), **overrides)
     set_env("activate_virtualenv", "source %s" % os.path.join(env.virtualenv_path,
                                                                  "bin", "activate"), **overrides)
+    set_env("config_dir", "config", **overrides)
+    set_env("environments_dir", "environments", **overrides)
     set_env("releases_dir", "releases", **overrides)
     set_env("current_dir", "current", **overrides)
     set_env("shared_dir", "shared", **overrides)
@@ -59,9 +61,9 @@ def setup(**overrides):
     set_env("shared_path", os.path.join(env.deploy_to, env.shared_dir), **overrides)
     set_env("current_path", os.path.join(env.deploy_to, env.current_dir), **overrides)
 
-    set_env("config_path", os.path.join(env.release_path, "config"), **overrides)
+    set_env("config_path", os.path.join(env.release_path, env.config_dir), **overrides)
     set_env("config_environments_path", os.path.join(env.config_path,
-                                                     "environments"), **overrides)
+                                                     env.environments_dir), **overrides)
 
     set_env("servers_path", os.path.join(env.app_root, "servers"), **overrides)
 register_setup(setup)
@@ -88,7 +90,7 @@ def find_previous_release():
 def find_canonical_current_release():
     with fab.settings(fab.hide('stdout')):
         with fab.cd(env.current_path):
-            current = os.path.basename(run("pwd -P"))
+            current = os.path.basename(fab.run("pwd -P"))
 
     return current
 
@@ -187,7 +189,7 @@ def install_config(release_path, config_dir='config', config_extension='py',
     paths = {
         "cmd": command,
         "deploy": os.path.join(
-            env.config_environments_path,
+            release_path, env.config_dir, env.environments_dir,
             "%s.%s" % (env.configuration_name, config_extension)
         ),
         "local": os.path.join(
