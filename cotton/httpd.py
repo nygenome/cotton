@@ -48,7 +48,7 @@ def status(sudo=True):
     httpd_cmd('status', sudo)
 
 @fab.task
-def update_conf(sudo=True, reload=False):
+def update_conf(sudo=True, reload_httpd=False):
     '''Regenerate and install the httpd config from the template.'''
     with fab.prefix("umask 0002"):
         upload_template(env.httpd_conf_template,
@@ -56,7 +56,7 @@ def update_conf(sudo=True, reload=False):
                         context=env,
                         mode=0664)
 
-    if reload:
+    if reload_httpd:
         reload(sudo)
 
 def httpd_cmd(cmd, sudo):
