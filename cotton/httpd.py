@@ -20,6 +20,7 @@ def setup(**overrides):
     set_env("httpd_conf_template", os.path.join("config", "servers", "httpd.template.conf"), **overrides)
     set_env("httpd_conf_dir", os.path.join(env.servers_path, "httpd"), **overrides)
     set_env("httpd_conf", os.path.join(env.httpd_conf_dir, "httpd.conf"), **overrides)
+    set_env("maintenance_file", os.path.join(env.httpd_conf_dir, "maintenance.enable"), **overrides)
 register_setup(setup)
 
 @fab.task
