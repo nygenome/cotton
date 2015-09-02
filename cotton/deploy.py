@@ -139,10 +139,20 @@ def checkout_source(ref=None):
 def make_symlinks(release_path):
     '''Create a 'current' symlink pointing to a release we just checked
     out, and symlinks within pointing to the shared children'''
+    make_current_symlink(release_path)
+    make_shared_children_symlinks(release_path)
+
+def make_current_symlink(release_path):
+    '''Create a 'current' symlink pointing to a release we just checked
+    out. '''
     with fab.settings(fab.hide('warnings'), warn_only=True):
         helpers.remote("test -L %(current_path)s && rm %(current_path)s" % env)
-
     helpers.remote("ln -s %s %s" % (release_path, env.current_path))
+
+
+def make_shared_children_symlinks(release_path):
+    ''' Create symlinks the release we just checked out pointing 
+    to the shared children'''
     for child in env.shared_children:
         child_path = os.path.join(release_path, child)
         with fab.settings(fab.hide('warnings'), warn_only=True):
@@ -152,6 +162,7 @@ def make_symlinks(release_path):
             os.path.join(env.shared_path, child),
             child_path
         ))
+
 
 
 def install_workspace():
