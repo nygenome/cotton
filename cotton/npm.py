@@ -30,7 +30,7 @@ def npm(command):
 	with fab.prefix("umask 0002"):
 		if env.npm_local:
 			with fab.lcd(env.npm_root):
-				fab.local("npm %s" % command)
+				fab.local("sudo -u %s npm %s" % (env.user, command))
 		else:
 			with fab.cd(env.npm_root):
 				helpers.remote("npm %s" % command)
